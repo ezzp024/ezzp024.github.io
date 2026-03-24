@@ -1,7 +1,6 @@
 const menuToggle = document.querySelector('.menu-toggle');
 const topnav = document.querySelector('.topnav');
 const revealItems = document.querySelectorAll('.reveal');
-const ADMIN_EMAIL = (window.ADMIN_EMAIL || 'ezzp024@gmail.com').toLowerCase();
 
 if (menuToggle && topnav) {
   menuToggle.addEventListener('click', () => {
@@ -52,11 +51,6 @@ const updateAdminTab = async () => {
     } = await window.sb.auth.getSession();
 
     if (!session?.user) {
-      return;
-    }
-
-    const email = String(session.user.email || '').toLowerCase();
-    if (email !== ADMIN_EMAIL) {
       return;
     }
 

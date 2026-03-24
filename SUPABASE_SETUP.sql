@@ -43,7 +43,6 @@ security definer
 set search_path = public
 as $$
 declare
-  admin_email text := 'ezzp024@gmail.com';
   effective_name text;
 begin
   effective_name := coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1), 'Member');
@@ -53,8 +52,8 @@ begin
     new.id,
     lower(new.email),
     effective_name,
-    lower(new.email) = lower(admin_email),
-    lower(new.email) = lower(admin_email)
+    false,
+    false
   )
   on conflict (id) do nothing;
 
@@ -92,8 +91,18 @@ create policy "profiles admin update"
 on public.profiles
 for update
 to authenticated
-using (lower(auth.jwt() ->> 'email') = 'ezzp024@gmail.com')
-with check (lower(auth.jwt() ->> 'email') = 'ezzp024@gmail.com');
+using (
+  exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid() and me.is_admin = true
+  )
+)
+with check (
+  exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid() and me.is_admin = true
+  )
+);
 
 drop policy if exists "threads read all" on public.threads;
 create policy "threads read all"
@@ -154,3 +163,8 @@ with check (
     where p.id = auth.uid() and p.approved = true
   )
 );
+
+-- Run this once to promote your admin account after signup:
+-- update public.profiles
+-- set is_admin = true, approved = true
+-- where email = 'YOUR_ADMIN_EMAIL_HERE';

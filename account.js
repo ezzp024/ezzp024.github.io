@@ -1,5 +1,4 @@
 const sb = window.sb;
-const ADMIN_EMAIL = (window.ADMIN_EMAIL || 'ezzp024@gmail.com').toLowerCase();
 
 const registerForm = document.querySelector('#registerForm');
 const loginForm = document.querySelector('#loginForm');
@@ -65,16 +64,11 @@ const ensureProfile = async (user, fallbackName = '') => {
   const email = String(user.email || '').toLowerCase();
   const displayName =
     String(user.user_metadata?.display_name || '').trim() || fallbackName || email.split('@')[0] || 'Member';
-  const approved = email === ADMIN_EMAIL;
-  const isAdmin = email === ADMIN_EMAIL;
-
   const { error } = await sb.from('profiles').upsert(
     {
       id: user.id,
       email,
-      display_name: displayName,
-      approved,
-      is_admin: isAdmin
+      display_name: displayName
     },
     { onConflict: 'id' }
   );

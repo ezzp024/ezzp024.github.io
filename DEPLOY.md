@@ -26,15 +26,22 @@ Open `config.js` and set:
 ```js
 window.SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
 window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-window.ADMIN_EMAIL = 'ezzp024@gmail.com';
 ```
 
 Commit and push.
 
 ## 4) Use admin approvals
 
-1. Register/login as `ezzp024@gmail.com`
-2. Open `admin.html`
-3. Approve pending users
+1. Register/login with your admin account
+2. In Supabase SQL Editor, promote that account to admin:
+
+```sql
+update public.profiles
+set is_admin = true, approved = true
+where email = 'YOUR_ADMIN_EMAIL_HERE';
+```
+
+3. Open `admin.html`
+4. Approve pending users
 
 Only approved users can create threads/replies/upvote.

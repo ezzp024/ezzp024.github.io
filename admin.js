@@ -1,5 +1,4 @@
 const sb = window.sb;
-const ADMIN_EMAIL = (window.ADMIN_EMAIL || 'ezzp024@gmail.com').toLowerCase();
 
 const adminPanel = document.querySelector('#adminPanel');
 const adminMessage = document.querySelector('#adminMessage');
@@ -59,9 +58,14 @@ const loadPending = async () => {
     return;
   }
 
-  const email = String(session.user.email || '').toLowerCase();
-  if (email !== ADMIN_EMAIL) {
-    setMessage('Access denied. Admin email only.', true);
+  const { data: me, error: meError } = await sb
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', session.user.id)
+    .single();
+
+  if (meError || !me?.is_admin) {
+    setMessage('Access denied. Admin account only.', true);
     renderPending([]);
     return;
   }
