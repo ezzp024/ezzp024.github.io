@@ -42,6 +42,8 @@ Commit and push.
    - `RESEND_API_KEY`
    - `EMAIL_FROM` (sender email/domain allowed by Resend)
 
+Note: if `EMAIL_FROM` is not set, backend defaults to `onboarding@resend.dev` for test mode.
+
 ## 5) Admin approvals
 
 - Admin is restricted to: `ezzp024@gmail.com`

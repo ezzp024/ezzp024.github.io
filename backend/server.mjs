@@ -11,7 +11,7 @@ const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'ezzp024@gmail.com').toLowerCase
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-session-secret-change-me';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const EMAIL_FROM = process.env.EMAIL_FROM || '';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
 const json = (res, status, payload) => {
   res.writeHead(status, {
