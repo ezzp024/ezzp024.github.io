@@ -3,119 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polly Tunnels | Software Builder</title>
+  <title>Polly Tunnels Forum</title>
   <meta
     name="description"
-    content="Polly Tunnels is a professional portfolio website with water animation and account access."
+    content="Polly Tunnels Forum is a modern community space where coders share ideas and build together."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=DM+Serif+Display:ital@0;1&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-glow"></div>
+  <div class="backdrop" aria-hidden="true">
+    <span class="bubble b1"></span>
+    <span class="bubble b2"></span>
+    <span class="bubble b3"></span>
+    <span class="wave-lines"></span>
+  </div>
 
-  <header class="site-header" id="top">
-    <a class="brand" href="#top">Polly Tunnels</a>
+  <header class="topbar" id="top">
+    <a class="logo" href="#top">Polly Tunnels</a>
     <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
-    <nav class="site-nav" aria-label="Main">
-      <a href="#about">About</a>
-      <a href="#skills">Skills</a>
-      <a href="#projects">Projects</a>
+    <nav class="topnav" aria-label="Main">
+      <a href="#feed">Feed</a>
+      <a href="#channels">Channels</a>
       <a href="#account">Account</a>
     </nav>
   </header>
 
   <main>
     <section class="hero reveal">
-      <div class="ocean" aria-hidden="true">
-        <span class="wave wave-1"></span>
-        <span class="wave wave-2"></span>
-        <span class="wave wave-3"></span>
-      </div>
-
-      <div class="hero-content">
-        <p class="eyebrow">Software Engineer Portfolio</p>
-        <h1>Polly Tunnels</h1>
+      <div>
+        <p class="tag">Community Forum</p>
+        <h1>Polly Tunnels Developer Harbor</h1>
         <p>
-          I am a coder who loves building things and creating working software.
-          I focus on useful products, clean architecture, and polished user experiences.
+          A fresh forum-style space for coders to talk, share projects, ask technical questions,
+          and build working software together.
         </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#account">Join My Site</a>
-          <a class="btn btn-ghost" href="#projects">View Projects</a>
+      </div>
+      <div class="hero-stats">
+        <article>
+          <h3 id="threadCount">0</h3>
+          <p>active threads</p>
+        </article>
+        <article>
+          <h3 id="messageCount">0</h3>
+          <p>total messages</p>
+        </article>
+        <article>
+          <h3>24/7</h3>
+          <p>community energy</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="layout reveal delay-1">
+      <aside id="channels" class="card panel-left">
+        <h2>Channels</h2>
+        <ul class="channel-list">
+          <li><span>#</span>general-chat</li>
+          <li><span>#</span>web-development</li>
+          <li><span>#</span>debug-help</li>
+          <li><span>#</span>app-showcase</li>
+          <li><span>#</span>automation-lab</li>
+        </ul>
+      </aside>
+
+      <section id="feed" class="card forum-center">
+        <div class="forum-head">
+          <h2>Live Discussion Feed</h2>
+          <p>Post your idea, question, or update. Everyone can reply.</p>
         </div>
-      </div>
-    </section>
 
-    <section id="about" class="section panel reveal delay-1">
-      <p class="eyebrow">About Me</p>
-      <h2>I build reliable, real-world software.</h2>
-      <p>
-        I enjoy turning ideas into products that actually run in production.
-        My workflow covers planning, coding, testing, launch, and iteration.
-        I care about performance, maintainability, and thoughtful design.
-      </p>
-    </section>
+        <form id="threadForm" class="thread-form">
+          <label>
+            Thread title
+            <input type="text" name="title" required maxlength="80" placeholder="Example: How do you structure APIs for scale?" />
+          </label>
+          <label>
+            Your message
+            <textarea
+              name="body"
+              required
+              rows="3"
+              maxlength="500"
+              placeholder="Share details, context, and what you are trying to build."
+            ></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">Create Thread</button>
+          <p id="threadNote" class="note" aria-live="polite"></p>
+        </form>
 
-    <section id="skills" class="section reveal delay-1">
-      <p class="eyebrow">What I Do</p>
-      <h2>From concept to deploy.</h2>
-      <div class="grid">
-        <article class="card">
-          <h3>Web Applications</h3>
-          <p>Responsive and scalable apps with smooth UI, secure forms, and clean code.</p>
-        </article>
-        <article class="card">
-          <h3>Automation</h3>
-          <p>Tools and scripts that remove repetitive work and speed up your business flow.</p>
-        </article>
-        <article class="card">
-          <h3>API Integrations</h3>
-          <p>Integrating external services for payments, analytics, auth, and messaging.</p>
-        </article>
-        <article class="card">
-          <h3>Problem Solving</h3>
-          <p>Debugging complex issues and shipping practical fixes quickly and safely.</p>
-        </article>
-      </div>
-    </section>
+        <div id="threadFeed" class="thread-feed"></div>
+      </section>
 
-    <section id="projects" class="section reveal delay-2">
-      <p class="eyebrow">Highlighted Work</p>
-      <h2>Things I like creating.</h2>
-      <div class="grid">
-        <article class="card project-card">
-          <h3>TaskFlow Engine</h3>
-          <p>Workflow platform that automates team approvals and tracks delivery metrics.</p>
-          <span>Node.js • APIs • Dashboard</span>
-        </article>
-        <article class="card project-card">
-          <h3>DockPulse Monitor</h3>
-          <p>Monitoring suite for small deployments with alerting and uptime insights.</p>
-          <span>Cloud • Alerts • Logs</span>
-        </article>
-      </div>
-    </section>
-
-    <section id="account" class="section account reveal">
-      <p class="eyebrow">Account Access</p>
-      <h2>Login with Google or register.</h2>
-
-      <div class="auth-wrap">
-        <div class="auth-tabs" role="tablist" aria-label="Authentication tabs">
+      <aside id="account" class="card panel-right">
+        <h2>Account</h2>
+        <div class="tabs" role="tablist" aria-label="Account forms">
           <button class="tab active" data-tab="register" role="tab" aria-selected="true">Register</button>
           <button class="tab" data-tab="login" role="tab" aria-selected="false">Login</button>
         </div>
 
-        <form id="registerForm" class="auth-form active" autocomplete="on">
+        <form id="registerForm" class="auth-form active">
           <label>
-            Full Name
-            <input type="text" name="name" required placeholder="Polly Tunnels" />
+            Name
+            <input type="text" name="name" required placeholder="Polly" />
           </label>
           <label>
             Email
@@ -123,12 +118,12 @@
           </label>
           <label>
             Password
-            <input type="password" name="password" minlength="6" required placeholder="At least 6 characters" />
+            <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" />
           </label>
-          <button type="submit" class="btn btn-primary">Create Account</button>
+          <button class="btn btn-primary" type="submit">Create Account</button>
         </form>
 
-        <form id="loginForm" class="auth-form" autocomplete="on">
+        <form id="loginForm" class="auth-form">
           <label>
             Email
             <input type="email" name="email" required placeholder="you@email.com" />
@@ -137,24 +132,33 @@
             Password
             <input type="password" name="password" required placeholder="Your password" />
           </label>
-          <button type="submit" class="btn btn-primary">Log In</button>
+          <button class="btn btn-primary" type="submit">Login</button>
         </form>
 
-        <div class="auth-divider"><span>or</span></div>
+        <div class="divider"><span>or</span></div>
         <button id="googleBtn" class="btn btn-google" type="button">Continue with Google</button>
+        <p id="authMessage" class="note" aria-live="polite"></p>
 
-        <p id="authMessage" class="auth-message" aria-live="polite"></p>
-
-        <div id="sessionPanel" class="session-panel" hidden>
+        <div id="sessionPanel" class="session" hidden>
           <p id="sessionText"></p>
           <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
         </div>
-      </div>
+
+        <div class="online-box">
+          <h3>Online now</h3>
+          <ul>
+            <li>CodeShore</li>
+            <li>TunnelByte</li>
+            <li>WaveSyntax</li>
+            <li>DebugCaptain</li>
+          </ul>
+        </div>
+      </aside>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>Polly Tunnels</p>
+  <footer class="footer">
+    <p>Polly Tunnels Forum</p>
     <a href="#top">Back to top</a>
   </footer>
 
