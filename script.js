@@ -17,10 +17,17 @@ const threadFeed = document.querySelector('#threadFeed');
 const threadNote = document.querySelector('#threadNote');
 const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
+const titleCount = document.querySelector('#titleCount');
+const bodyCount = document.querySelector('#bodyCount');
+const feedSearch = document.querySelector('#feedSearch');
+const clearSearch = document.querySelector('#clearSearch');
+const scrollProgress = document.querySelector('#scrollProgress');
+const jumpToFeed = document.querySelector('#jumpToFeed');
 
 const USERS_KEY = 'polly_forum_users';
 const SESSION_KEY = 'polly_forum_session';
 const THREADS_KEY = 'polly_forum_threads';
+const DRAFT_KEY = 'polly_forum_thread_draft';
 
 if (menuToggle && topnav) {
   menuToggle.addEventListener('click', () => {
@@ -65,6 +72,23 @@ const writeJSON = (key, value) => {
 };
 
 const formatTime = (value) => new Date(value).toLocaleString();
+
+const updateComposerCounts = () => {
+  if (!threadForm) {
+    return;
+  }
+
+  const titleInput = threadForm.querySelector('input[name="title"]');
+  const bodyInput = threadForm.querySelector('textarea[name="body"]');
+
+  if (titleCount && titleInput) {
+    titleCount.textContent = `${titleInput.value.length}/80`;
+  }
+
+  if (bodyCount && bodyInput) {
+    bodyCount.textContent = `${bodyInput.value.length}/500`;
+  }
+};
 
 const setAuthMessage = (msg, error = false) => {
   if (!authMessage) {
@@ -154,17 +178,29 @@ const renderThreads = () => {
     return;
   }
 
-  const threads = readJSON(THREADS_KEY, []).sort((a, b) => b.createdAt - a.createdAt);
+  const searchTerm = (feedSearch?.value || '').trim().toLowerCase();
+  const allThreads = readJSON(THREADS_KEY, []);
+  const threads = allThreads
+    .filter((thread) => {
+      if (!searchTerm) {
+        return true;
+      }
+
+      const joined = `${thread.title} ${thread.body} ${thread.author}`.toLowerCase();
+      return joined.includes(searchTerm);
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
   threadFeed.innerHTML = '';
 
   if (threads.length === 0) {
-    threadFeed.innerHTML = '<p class="note">No threads yet. Start the first conversation.</p>';
+    threadFeed.innerHTML = searchTerm
+      ? '<p class="note">No matches found. Try a different keyword.</p>'
+      : '<p class="note">No threads yet. Start the first conversation.</p>';
   }
 
-  let totalMessages = 0;
+  const totalMessages = allThreads.reduce((sum, thread) => sum + 1 + thread.replies.length, 0);
 
   threads.forEach((thread) => {
-    totalMessages += 1 + thread.replies.length;
     const repliesHTML = thread.replies
       .map(
         (reply) => `
@@ -200,7 +236,7 @@ const renderThreads = () => {
   });
 
   if (threadCount) {
-    threadCount.textContent = String(threads.length);
+    threadCount.textContent = String(allThreads.length);
   }
 
   if (messageCount) {
@@ -297,6 +333,27 @@ if (logoutBtn) {
 }
 
 if (threadForm) {
+  const titleInput = threadForm.querySelector('input[name="title"]');
+  const bodyInput = threadForm.querySelector('textarea[name="body"]');
+
+  const draft = readJSON(DRAFT_KEY, null);
+  if (draft && typeof draft.title === 'string' && typeof draft.body === 'string') {
+    titleInput.value = draft.title;
+    bodyInput.value = draft.body;
+  }
+
+  updateComposerCounts();
+
+  [titleInput, bodyInput].forEach((input) => {
+    input.addEventListener('input', () => {
+      updateComposerCounts();
+      writeJSON(DRAFT_KEY, {
+        title: titleInput.value,
+        body: bodyInput.value
+      });
+    });
+  });
+
   threadForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const data = new FormData(threadForm);
@@ -325,6 +382,23 @@ if (threadForm) {
     renderThreads();
     setThreadMessage('Thread posted to the community feed.');
     threadForm.reset();
+    localStorage.removeItem(DRAFT_KEY);
+    updateComposerCounts();
+    threadFeed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+if (feedSearch) {
+  feedSearch.addEventListener('input', () => {
+    renderThreads();
+  });
+}
+
+if (clearSearch && feedSearch) {
+  clearSearch.addEventListener('click', () => {
+    feedSearch.value = '';
+    renderThreads();
+    feedSearch.focus();
   });
 }
 
@@ -369,6 +443,29 @@ if (threadFeed) {
     writeJSON(THREADS_KEY, threads);
     renderThreads();
     setThreadMessage('Reply added.');
+  });
+}
+
+const onScroll = () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const amount = max > 0 ? (window.scrollY / max) * 100 : 0;
+
+  if (scrollProgress) {
+    scrollProgress.style.width = `${amount}%`;
+  }
+
+  if (jumpToFeed) {
+    jumpToFeed.classList.toggle('visible', window.scrollY > 420);
+  }
+};
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+if (jumpToFeed) {
+  jumpToFeed.addEventListener('click', () => {
+    const feed = document.querySelector('#feed');
+    feed?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
