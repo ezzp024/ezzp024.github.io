@@ -3,160 +3,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Northline Studio | Build Bold</title>
+  <title>Polly Tunnels | Software Builder</title>
   <meta
     name="description"
-    content="Northline Studio builds brands, websites, and launch campaigns that stand out fast."
+    content="Polly Tunnels is a professional portfolio website with water animation and account access."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=DM+Serif+Display:ital@0;1&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="grain"></div>
+  <div class="bg-glow"></div>
 
   <header class="site-header" id="top">
-    <a class="brand" href="#top">Northline</a>
+    <a class="brand" href="#top">Polly Tunnels</a>
     <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
     <nav class="site-nav" aria-label="Main">
-      <a href="#services">Services</a>
-      <a href="#work">Work</a>
       <a href="#about">About</a>
-      <a href="#contact">Contact</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#account">Account</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-copy reveal">
-        <p class="eyebrow">Creative + Web Studio</p>
-        <h1>We build websites people actually remember.</h1>
+    <section class="hero reveal">
+      <div class="ocean" aria-hidden="true">
+        <span class="wave wave-1"></span>
+        <span class="wave wave-2"></span>
+        <span class="wave wave-3"></span>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow">Software Engineer Portfolio</p>
+        <h1>Polly Tunnels</h1>
         <p>
-          Fast, polished, and conversion-focused digital experiences for creators,
-          small teams, and growing brands.
+          I am a coder who loves building things and creating working software.
+          I focus on useful products, clean architecture, and polished user experiences.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#contact">Start Your Project</a>
-          <a class="btn btn-ghost" href="#work">See Our Work</a>
+          <a class="btn btn-primary" href="#account">Join My Site</a>
+          <a class="btn btn-ghost" href="#projects">View Projects</a>
         </div>
       </div>
-      <div class="hero-card reveal delay-1">
-        <h2>Launch Sprint</h2>
-        <p>From first idea to live site in 10 days.</p>
-        <ul>
-          <li>Strategy + messaging</li>
-          <li>Custom design and animations</li>
-          <li>Mobile optimization and SEO basics</li>
-          <li>Training and handoff</li>
-        </ul>
-      </div>
     </section>
 
-    <section class="stats reveal delay-2" aria-label="Studio stats">
-      <article>
-        <h3>120+</h3>
-        <p>websites launched</p>
-      </article>
-      <article>
-        <h3>4.9/5</h3>
-        <p>average client rating</p>
-      </article>
-      <article>
-        <h3>10 days</h3>
-        <p>average launch timeline</p>
-      </article>
-    </section>
-
-    <section id="services" class="section reveal">
-      <p class="eyebrow">Services</p>
-      <h2>Everything you need to go live confidently.</h2>
-      <div class="cards-grid">
-        <article class="card">
-          <h3>Brand Identity</h3>
-          <p>Logo, color system, and visual direction that keeps your brand recognizable.</p>
-        </article>
-        <article class="card">
-          <h3>Web Design</h3>
-          <p>Custom, responsive design with motion and layout built around your goals.</p>
-        </article>
-        <article class="card">
-          <h3>Copy + SEO</h3>
-          <p>Clear messaging and search-ready structure so people find and trust you.</p>
-        </article>
-        <article class="card">
-          <h3>Growth Support</h3>
-          <p>Monthly updates, landing pages, and campaigns as your business evolves.</p>
-        </article>
-      </div>
-    </section>
-
-    <section id="work" class="section reveal">
-      <p class="eyebrow">Featured Work</p>
-      <h2>Recent launches from our clients.</h2>
-      <div class="project-grid">
-        <article class="project">
-          <h3>Holloway Fitness</h3>
-          <p>Membership site + booking flow. Leads increased by 68% in 30 days.</p>
-          <span>Web Design • Conversion</span>
-        </article>
-        <article class="project">
-          <h3>WaveTable Coffee</h3>
-          <p>Brand refresh and ecommerce storefront built for repeat orders.</p>
-          <span>Branding • Ecommerce</span>
-        </article>
-        <article class="project">
-          <h3>Atlas Creative</h3>
-          <p>Portfolio website with motion storytelling to win premium clients.</p>
-          <span>UX • Motion</span>
-        </article>
-      </div>
-    </section>
-
-    <section id="about" class="section split reveal">
-      <div>
-        <p class="eyebrow">About</p>
-        <h2>Small studio. Big attention to detail.</h2>
-      </div>
+    <section id="about" class="section panel reveal delay-1">
+      <p class="eyebrow">About Me</p>
+      <h2>I build reliable, real-world software.</h2>
       <p>
-        We are a compact team of strategists, designers, and builders who believe
-        a website should look incredible and work hard. No templates. No bloat.
-        Just sharp thinking and fast execution.
+        I enjoy turning ideas into products that actually run in production.
+        My workflow covers planning, coding, testing, launch, and iteration.
+        I care about performance, maintainability, and thoughtful design.
       </p>
     </section>
 
-    <section id="contact" class="section contact reveal">
-      <p class="eyebrow">Contact</p>
-      <h2>Tell us what you are building.</h2>
-      <form class="contact-form" id="contactForm">
-        <label>
-          Name
-          <input type="text" name="name" placeholder="Your name" required />
-        </label>
-        <label>
-          Email
-          <input type="email" name="email" placeholder="you@email.com" required />
-        </label>
-        <label>
-          Project Details
-          <textarea
-            name="details"
-            rows="4"
-            placeholder="What do you need and when do you want to launch?"
-            required
-          ></textarea>
-        </label>
-        <button class="btn btn-primary" type="submit">Send Request</button>
-        <p class="form-note" id="formNote" aria-live="polite"></p>
-      </form>
+    <section id="skills" class="section reveal delay-1">
+      <p class="eyebrow">What I Do</p>
+      <h2>From concept to deploy.</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Web Applications</h3>
+          <p>Responsive and scalable apps with smooth UI, secure forms, and clean code.</p>
+        </article>
+        <article class="card">
+          <h3>Automation</h3>
+          <p>Tools and scripts that remove repetitive work and speed up your business flow.</p>
+        </article>
+        <article class="card">
+          <h3>API Integrations</h3>
+          <p>Integrating external services for payments, analytics, auth, and messaging.</p>
+        </article>
+        <article class="card">
+          <h3>Problem Solving</h3>
+          <p>Debugging complex issues and shipping practical fixes quickly and safely.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects" class="section reveal delay-2">
+      <p class="eyebrow">Highlighted Work</p>
+      <h2>Things I like creating.</h2>
+      <div class="grid">
+        <article class="card project-card">
+          <h3>TaskFlow Engine</h3>
+          <p>Workflow platform that automates team approvals and tracks delivery metrics.</p>
+          <span>Node.js • APIs • Dashboard</span>
+        </article>
+        <article class="card project-card">
+          <h3>DockPulse Monitor</h3>
+          <p>Monitoring suite for small deployments with alerting and uptime insights.</p>
+          <span>Cloud • Alerts • Logs</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="account" class="section account reveal">
+      <p class="eyebrow">Account Access</p>
+      <h2>Login with Google or register.</h2>
+
+      <div class="auth-wrap">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication tabs">
+          <button class="tab active" data-tab="register" role="tab" aria-selected="true">Register</button>
+          <button class="tab" data-tab="login" role="tab" aria-selected="false">Login</button>
+        </div>
+
+        <form id="registerForm" class="auth-form active" autocomplete="on">
+          <label>
+            Full Name
+            <input type="text" name="name" required placeholder="Polly Tunnels" />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" required placeholder="you@email.com" />
+          </label>
+          <label>
+            Password
+            <input type="password" name="password" minlength="6" required placeholder="At least 6 characters" />
+          </label>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+
+        <form id="loginForm" class="auth-form" autocomplete="on">
+          <label>
+            Email
+            <input type="email" name="email" required placeholder="you@email.com" />
+          </label>
+          <label>
+            Password
+            <input type="password" name="password" required placeholder="Your password" />
+          </label>
+          <button type="submit" class="btn btn-primary">Log In</button>
+        </form>
+
+        <div class="auth-divider"><span>or</span></div>
+        <button id="googleBtn" class="btn btn-google" type="button">Continue with Google</button>
+
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+
+        <div id="sessionPanel" class="session-panel" hidden>
+          <p id="sessionText"></p>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>Northline Studio</p>
+    <p>Polly Tunnels</p>
     <a href="#top">Back to top</a>
   </footer>
 
