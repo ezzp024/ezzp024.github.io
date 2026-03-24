@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Northline Studio | Build Bold</title>
+  <meta
+    name="description"
+    content="Northline Studio builds brands, websites, and launch campaigns that stand out fast."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="grain"></div>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="#top">Northline</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Creative + Web Studio</p>
+        <h1>We build websites people actually remember.</h1>
+        <p>
+          Fast, polished, and conversion-focused digital experiences for creators,
+          small teams, and growing brands.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contact">Start Your Project</a>
+          <a class="btn btn-ghost" href="#work">See Our Work</a>
+        </div>
+      </div>
+      <div class="hero-card reveal delay-1">
+        <h2>Launch Sprint</h2>
+        <p>From first idea to live site in 10 days.</p>
+        <ul>
+          <li>Strategy + messaging</li>
+          <li>Custom design and animations</li>
+          <li>Mobile optimization and SEO basics</li>
+          <li>Training and handoff</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="stats reveal delay-2" aria-label="Studio stats">
+      <article>
+        <h3>120+</h3>
+        <p>websites launched</p>
+      </article>
+      <article>
+        <h3>4.9/5</h3>
+        <p>average client rating</p>
+      </article>
+      <article>
+        <h3>10 days</h3>
+        <p>average launch timeline</p>
+      </article>
+    </section>
+
+    <section id="services" class="section reveal">
+      <p class="eyebrow">Services</p>
+      <h2>Everything you need to go live confidently.</h2>
+      <div class="cards-grid">
+        <article class="card">
+          <h3>Brand Identity</h3>
+          <p>Logo, color system, and visual direction that keeps your brand recognizable.</p>
+        </article>
+        <article class="card">
+          <h3>Web Design</h3>
+          <p>Custom, responsive design with motion and layout built around your goals.</p>
+        </article>
+        <article class="card">
+          <h3>Copy + SEO</h3>
+          <p>Clear messaging and search-ready structure so people find and trust you.</p>
+        </article>
+        <article class="card">
+          <h3>Growth Support</h3>
+          <p>Monthly updates, landing pages, and campaigns as your business evolves.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="work" class="section reveal">
+      <p class="eyebrow">Featured Work</p>
+      <h2>Recent launches from our clients.</h2>
+      <div class="project-grid">
+        <article class="project">
+          <h3>Holloway Fitness</h3>
+          <p>Membership site + booking flow. Leads increased by 68% in 30 days.</p>
+          <span>Web Design • Conversion</span>
+        </article>
+        <article class="project">
+          <h3>WaveTable Coffee</h3>
+          <p>Brand refresh and ecommerce storefront built for repeat orders.</p>
+          <span>Branding • Ecommerce</span>
+        </article>
+        <article class="project">
+          <h3>Atlas Creative</h3>
+          <p>Portfolio website with motion storytelling to win premium clients.</p>
+          <span>UX • Motion</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="section split reveal">
+      <div>
+        <p class="eyebrow">About</p>
+        <h2>Small studio. Big attention to detail.</h2>
+      </div>
+      <p>
+        We are a compact team of strategists, designers, and builders who believe
+        a website should look incredible and work hard. No templates. No bloat.
+        Just sharp thinking and fast execution.
+      </p>
+    </section>
+
+    <section id="contact" class="section contact reveal">
+      <p class="eyebrow">Contact</p>
+      <h2>Tell us what you are building.</h2>
+      <form class="contact-form" id="contactForm">
+        <label>
+          Name
+          <input type="text" name="name" placeholder="Your name" required />
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" placeholder="you@email.com" required />
+        </label>
+        <label>
+          Project Details
+          <textarea
+            name="details"
+            rows="4"
+            placeholder="What do you need and when do you want to launch?"
+            required
+          ></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">Send Request</button>
+        <p class="form-note" id="formNote" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Northline Studio</p>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
