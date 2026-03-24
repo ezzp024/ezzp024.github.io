@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: polly-tunnels-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: PORT
+        value: 8787
+      - key: ADMIN_EMAIL
+        value: ezzp024@gmail.com
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
