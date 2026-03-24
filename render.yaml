@@ -13,7 +13,7 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        value: 923128845782-t4j1gf0leul3qejnk4mp5h3ngbe9acb1.apps.googleusercontent.com
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
