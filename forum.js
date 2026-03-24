@@ -5,30 +5,11 @@ const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
 
-const SESSION_KEY = 'polly_forum_session';
-const FALLBACK_THREADS_KEY = 'polly_forum_threads_local';
 const API_BASE = window.FORUM_API_BASE || 'http://localhost:8787/api';
+const TOKEN_KEY = 'polly_forum_token';
 
 let currentSort = 'hot';
 let backendAvailable = false;
-
-const readJSON = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const writeJSON = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const getSessionName = () => {
-  const session = readJSON(SESSION_KEY, null);
-  return session?.name || 'Guest Coder';
-};
 
 const setThreadMessage = (message, isError = false) => {
   if (!threadNote) {
@@ -37,6 +18,26 @@ const setThreadMessage = (message, isError = false) => {
 
   threadNote.textContent = message;
   threadNote.style.color = isError ? '#ffb7b7' : '#90ffd2';
+};
+
+const api = async (path, options = {}) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Request failed: ${response.status}`);
+  }
+
+  return payload;
 };
 
 const escapeHtml = (text) =>
@@ -49,60 +50,6 @@ const escapeHtml = (text) =>
 
 const formatTime = (value) => new Date(value).toLocaleString();
 
-const hotScore = (thread) => {
-  const ageHours = Math.max((Date.now() - Number(thread.createdAt || Date.now())) / 3600000, 1);
-  const replyCount = Array.isArray(thread.replies) ? thread.replies.length : 0;
-  const upvotes = Number(thread.upvotes || 0);
-  return upvotes * 3 + replyCount * 2 - ageHours * 0.1;
-};
-
-const sortThreads = (threads) => {
-  const list = [...threads];
-  if (currentSort === 'new') {
-    return list.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
-  }
-  return list.sort((a, b) => hotScore(b) - hotScore(a));
-};
-
-const fallbackSeedThreads = () => {
-  const existing = readJSON(FALLBACK_THREADS_KEY, []);
-  if (existing.length > 0) {
-    return;
-  }
-
-  writeJSON(FALLBACK_THREADS_KEY, [
-    {
-      id: `t-${Date.now()}-1`,
-      title: 'How do you debug random production crashes?',
-      body: 'Looking for practical steps for hard-to-reproduce issues.',
-      author: 'Polly',
-      createdAt: Date.now() - 7200000,
-      upvotes: 4,
-      replies: [
-        {
-          id: `r-${Date.now()}-1`,
-          author: 'WaveSyntax',
-          text: 'Start with traces and error boundaries. Record user context.',
-          createdAt: Date.now() - 6500000
-        }
-      ]
-    }
-  ]);
-};
-
-const api = async (path, options = {}) => {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options
-  });
-
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-
-  return response.json();
-};
-
 const checkBackend = async () => {
   try {
     const data = await api('/health');
@@ -113,79 +60,28 @@ const checkBackend = async () => {
 };
 
 const getThreads = async () => {
-  if (backendAvailable) {
-    const payload = await api(`/threads?sort=${currentSort}`);
-    return payload.threads || [];
-  }
-
-  fallbackSeedThreads();
-  return sortThreads(readJSON(FALLBACK_THREADS_KEY, []));
-};
-
-const saveFallbackThreads = (threads) => {
-  writeJSON(FALLBACK_THREADS_KEY, threads);
+  const payload = await api(`/threads?sort=${currentSort}`);
+  return payload.threads || [];
 };
 
 const createThread = async (title, body) => {
-  const payload = {
-    title,
-    body,
-    author: getSessionName()
-  };
-
-  if (backendAvailable) {
-    await api('/threads', { method: 'POST', body: JSON.stringify(payload) });
-    return;
-  }
-
-  const threads = readJSON(FALLBACK_THREADS_KEY, []);
-  threads.push({
-    id: `t-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    title,
-    body,
-    author: payload.author,
-    createdAt: Date.now(),
-    upvotes: 0,
-    replies: []
+  await api('/threads', {
+    method: 'POST',
+    body: JSON.stringify({ title, body })
   });
-  saveFallbackThreads(threads);
 };
 
 const addReply = async (threadId, text) => {
-  const payload = { text, author: getSessionName() };
-
-  if (backendAvailable) {
-    await api(`/threads/${threadId}/replies`, { method: 'POST', body: JSON.stringify(payload) });
-    return;
-  }
-
-  const threads = readJSON(FALLBACK_THREADS_KEY, []);
-  const target = threads.find((thread) => thread.id === threadId);
-  if (!target) {
-    throw new Error('Thread not found');
-  }
-  target.replies.push({
-    id: `r-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    text,
-    author: payload.author,
-    createdAt: Date.now()
+  await api(`/threads/${threadId}/replies`, {
+    method: 'POST',
+    body: JSON.stringify({ text })
   });
-  saveFallbackThreads(threads);
 };
 
 const upvoteThread = async (threadId) => {
-  if (backendAvailable) {
-    await api(`/threads/${threadId}/upvote`, { method: 'POST' });
-    return;
-  }
-
-  const threads = readJSON(FALLBACK_THREADS_KEY, []);
-  const target = threads.find((thread) => thread.id === threadId);
-  if (!target) {
-    throw new Error('Thread not found');
-  }
-  target.upvotes = Number(target.upvotes || 0) + 1;
-  saveFallbackThreads(threads);
+  await api(`/threads/${threadId}/upvote`, {
+    method: 'POST'
+  });
 };
 
 const renderThreads = async () => {
@@ -201,8 +97,12 @@ const renderThreads = async () => {
     0
   );
 
-  threadCount.textContent = String(threads.length);
-  messageCount.textContent = String(totalMessages);
+  if (threadCount) {
+    threadCount.textContent = String(threads.length);
+  }
+  if (messageCount) {
+    messageCount.textContent = String(totalMessages);
+  }
 
   if (threads.length === 0) {
     threadFeed.innerHTML = '<p class="note">No threads yet. Start the first one.</p>';
@@ -248,7 +148,6 @@ const renderThreads = async () => {
         <button class="btn btn-ghost" type="submit">Reply</button>
       </form>
     `;
-
     threadFeed.appendChild(item);
   });
 };
@@ -259,11 +158,15 @@ sortTabs.forEach((tab) => {
       item.classList.remove('active');
       item.setAttribute('aria-selected', 'false');
     });
-
     tab.classList.add('active');
     tab.setAttribute('aria-selected', 'true');
-    currentSort = tab.dataset.sort;
-    await renderThreads();
+    currentSort = tab.dataset.sort || 'hot';
+
+    try {
+      await renderThreads();
+    } catch (error) {
+      setThreadMessage(error.message, true);
+    }
   });
 });
 
@@ -284,8 +187,8 @@ if (threadForm) {
       threadForm.reset();
       await renderThreads();
       setThreadMessage('Thread created.');
-    } catch {
-      setThreadMessage('Could not create thread right now.', true);
+    } catch (error) {
+      setThreadMessage(error.message, true);
     }
   });
 }
@@ -307,8 +210,8 @@ if (threadFeed) {
       try {
         await upvoteThread(threadId);
         await renderThreads();
-      } catch {
-        setThreadMessage('Could not upvote this thread.', true);
+      } catch (error) {
+        setThreadMessage(error.message, true);
       }
       return;
     }
@@ -347,8 +250,8 @@ if (threadFeed) {
       await addReply(threadId, text);
       await renderThreads();
       setThreadMessage('Reply posted.');
-    } catch {
-      setThreadMessage('Could not post reply right now.', true);
+    } catch (error) {
+      setThreadMessage(error.message, true);
     }
   });
 }
@@ -356,8 +259,10 @@ if (threadFeed) {
 const boot = async () => {
   await checkBackend();
   if (!backendAvailable) {
-    setThreadMessage('Using local mode. Start backend for global shared posts.');
+    setThreadMessage('Backend not reachable. Start backend to use forum.');
+    return;
   }
+
   await renderThreads();
 };
 

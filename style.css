@@ -417,6 +417,12 @@ textarea {
   color: #12314a;
 }
 
+.google-button-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
 .side-btn {
   margin-top: 0.8rem;
   display: inline-flex;
@@ -575,6 +581,32 @@ textarea {
   background: rgba(7, 20, 35, 0.76);
 }
 
+.admin-actions {
+  margin-top: 0.8rem;
+}
+
+.admin-list {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.admin-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(7, 20, 35, 0.75);
+  padding: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.admin-item p {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+
 .footer {
   margin-top: 2rem;
   border-top: 1px solid var(--line);
@@ -647,5 +679,10 @@ textarea {
 
   .reply-form {
     flex-direction: column;
+  }
+
+  .admin-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

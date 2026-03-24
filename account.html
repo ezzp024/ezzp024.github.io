@@ -28,6 +28,7 @@
       <a href="index.html">Home</a>
       <a href="forum.html">Forum</a>
       <a class="active" href="account.html">Account</a>
+      <a href="admin.html">Admin</a>
     </nav>
   </header>
 
@@ -44,7 +45,9 @@
         <label>Name <input name="name" required placeholder="Polly" /></label>
         <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
         <label>Password <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" /></label>
-        <button class="btn btn-primary" type="submit">Create Account</button>
+        <button id="sendCodeBtn" class="btn btn-ghost" type="button">Send Verification Code</button>
+        <label>Verification code <input name="code" inputmode="numeric" minlength="6" maxlength="6" placeholder="6-digit code from email" /></label>
+        <button class="btn btn-primary" type="submit">Verify and Create Account</button>
       </form>
 
       <form id="loginForm" class="auth-form">
@@ -54,7 +57,8 @@
       </form>
 
       <div class="divider"><span>or</span></div>
-      <button id="googleBtn" class="btn btn-google" type="button">Continue with Google</button>
+      <div id="googleBtn" class="google-button-wrap"></div>
+      <button id="googleFallbackBtn" class="btn btn-google" type="button">Continue with Google</button>
       <p id="authMessage" class="note" aria-live="polite"></p>
 
       <div id="sessionPanel" class="session" hidden>
@@ -69,6 +73,8 @@
     <a href="forum.html">Go to forum</a>
   </footer>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
   <script src="account.js"></script>
 </body>

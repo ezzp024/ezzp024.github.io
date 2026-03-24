@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polly Tunnels | Admin</title>
+  <meta name="description" content="Admin approvals for Polly Tunnels." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="water-bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="wave-sheet"></span>
+  </div>
+
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+      <a class="active" href="admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main class="account-main">
+    <section class="account-wrap card reveal">
+      <p class="tag">Admin Control</p>
+      <h1>Registration Approvals</h1>
+      <p>Only <strong>ezzp024@gmail.com</strong> can approve user access.</p>
+
+      <div class="admin-actions">
+        <button id="refreshAdminBtn" class="btn btn-ghost" type="button">Refresh List</button>
+      </div>
+
+      <p id="adminMessage" class="note" aria-live="polite"></p>
+      <div id="adminPanel" class="admin-list"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels Admin</p>
+    <a href="forum.html">Go to forum</a>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
