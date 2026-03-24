@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polly Tunnels | Account</title>
+  <meta name="description" content="Create an account for Polly Tunnels forum." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="water-bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="wave-sheet"></span>
+  </div>
+
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a class="active" href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main class="account-main">
+    <section class="account-wrap card reveal">
+      <p class="tag">Profile Access</p>
+      <h1>Register or Login</h1>
+      <div class="sort-tabs" role="tablist" aria-label="Account tabs">
+        <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
+        <button class="auth-tab" data-auth-tab="login" role="tab" aria-selected="false">Login</button>
+      </div>
+
+      <form id="registerForm" class="auth-form active">
+        <label>Name <input name="name" required placeholder="Polly" /></label>
+        <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
+        <label>Password <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" /></label>
+        <button class="btn btn-primary" type="submit">Create Account</button>
+      </form>
+
+      <form id="loginForm" class="auth-form">
+        <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
+        <label>Password <input type="password" name="password" required placeholder="Your password" /></label>
+        <button class="btn btn-primary" type="submit">Login</button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+      <button id="googleBtn" class="btn btn-google" type="button">Continue with Google</button>
+      <p id="authMessage" class="note" aria-live="polite"></p>
+
+      <div id="sessionPanel" class="session" hidden>
+        <p id="sessionText"></p>
+        <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels Account</p>
+    <a href="forum.html">Go to forum</a>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="account.js"></script>
+</body>
+</html>

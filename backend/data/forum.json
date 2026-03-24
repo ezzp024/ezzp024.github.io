@@ -1,0 +1,13 @@
+{
+  "threads": [
+    {
+      "id": "t-seed-1",
+      "title": "Welcome to Polly Tunnels Forum",
+      "body": "This backend stores shared posts for everyone connected to this server.",
+      "author": "System",
+      "createdAt": 1761300000000,
+      "upvotes": 1,
+      "replies": []
+    }
+  ]
+}

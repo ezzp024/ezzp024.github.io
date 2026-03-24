@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polly Tunnels | Forum</title>
+  <meta name="description" content="Threaded software forum with hot/new sorting and upvotes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="water-bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="wave-sheet"></span>
+  </div>
+
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a class="active" href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main class="forum-main">
+    <section class="forum-hero reveal">
+      <div>
+        <p class="tag">Threaded Discussions</p>
+        <h1>Developer Harbor Feed</h1>
+        <p>Ask deep technical questions, share updates, and help others ship.</p>
+      </div>
+      <div class="forum-stats">
+        <article><h3 id="threadCount">0</h3><p>threads</p></article>
+        <article><h3 id="messageCount">0</h3><p>messages</p></article>
+      </div>
+    </section>
+
+    <section class="forum-layout reveal delay-1">
+      <aside class="card side-panel">
+        <h2>Channels</h2>
+        <ul class="channel-list">
+          <li><span>#</span>general-chat</li>
+          <li><span>#</span>web-development</li>
+          <li><span>#</span>debug-help</li>
+          <li><span>#</span>app-showcase</li>
+          <li><span>#</span>automation-lab</li>
+        </ul>
+      </aside>
+
+      <section class="card forum-center" id="feed">
+        <div class="feed-top">
+          <div>
+            <h2>Community Threads</h2>
+            <p>Upvote useful posts and sort by Hot or New.</p>
+          </div>
+          <div class="sort-tabs" role="tablist" aria-label="Thread sorting">
+            <button class="tab active" data-sort="hot" role="tab" aria-selected="true">Hot</button>
+            <button class="tab" data-sort="new" role="tab" aria-selected="false">New</button>
+          </div>
+        </div>
+
+        <form id="threadForm" class="thread-form">
+          <label>
+            Thread title
+            <input name="title" required maxlength="90" placeholder="What are you building today?" />
+          </label>
+          <label>
+            Your message
+            <textarea name="body" rows="4" required maxlength="550" placeholder="Explain your challenge or update."></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">Post Thread</button>
+          <p id="threadNote" class="note" aria-live="polite"></p>
+        </form>
+
+        <div id="threadFeed" class="thread-feed"></div>
+      </section>
+
+      <aside class="card side-panel">
+        <h2>Forum Flow</h2>
+        <ul class="flow-list">
+          <li>1) Register on the Account page</li>
+          <li>2) Create a thread with full context</li>
+          <li>3) Reply in threads and upvote strong answers</li>
+          <li>4) Collapse long threads for easier reading</li>
+        </ul>
+        <a class="btn btn-ghost side-btn" href="account.html">Open Account</a>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels Forum</p>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="forum.js"></script>
+</body>
+</html>

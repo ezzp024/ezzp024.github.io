@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polly Tunnels Forum</title>
-  <meta
-    name="description"
-    content="Polly Tunnels Forum is a modern community space where coders share ideas and build together."
-  />
+  <title>Polly Tunnels | Home</title>
+  <meta name="description" content="Polly Tunnels is a software community forum for builders." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -17,181 +14,58 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
-  <div class="backdrop" aria-hidden="true">
-    <span class="bubble b1"></span>
-    <span class="bubble b2"></span>
-    <span class="bubble b3"></span>
-    <span class="wave-lines"></span>
+  <div class="water-bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="wave-sheet"></span>
   </div>
 
   <header class="topbar" id="top">
-    <a class="logo" href="#top">Polly Tunnels</a>
+    <a class="logo" href="index.html">Polly Tunnels</a>
     <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
     <nav class="topnav" aria-label="Main">
-      <a href="#feed">Feed</a>
-      <a href="#channels">Channels</a>
-      <a href="#account">Account</a>
+      <a class="active" href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
     </nav>
   </header>
 
-  <main>
+  <main class="home-main">
     <section class="hero reveal">
-      <div>
-        <p class="tag">Community Forum</p>
-        <h1>Polly Tunnels Developer Harbor</h1>
-        <p>
-          A fresh forum-style space for coders to talk, share projects, ask technical questions,
-          and build working software together.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#feed">Start a Discussion</a>
-          <a class="btn btn-ghost" href="#account">Create Account</a>
-        </div>
-        <p class="live-pill"><span></span> Live flow: Post -> Reply -> Build together</p>
-      </div>
-      <div class="hero-stats">
-        <article>
-          <h3 id="threadCount">0</h3>
-          <p>active threads</p>
-        </article>
-        <article>
-          <h3 id="messageCount">0</h3>
-          <p>total messages</p>
-        </article>
-        <article>
-          <h3>24/7</h3>
-          <p>community energy</p>
-        </article>
+      <p class="tag">Developer Community</p>
+      <h1>Welcome to Polly Tunnels</h1>
+      <p>
+        I am a coder who loves creating working software. This space is designed for people who
+        want clean discussions, practical answers, and real momentum.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="forum.html">Enter Forum</a>
+        <a class="btn btn-ghost" href="account.html">Create Account</a>
       </div>
     </section>
 
-    <section class="quick-flow reveal delay-1" aria-label="How the forum works">
-      <article class="flow-card">
-        <h3>1. Join Fast</h3>
-        <p>Register in seconds or use Google demo login to jump in.</p>
+    <section class="steps reveal delay-1">
+      <article class="step-card">
+        <h3>Join</h3>
+        <p>Register in under a minute and personalize your forum identity.</p>
       </article>
-      <article class="flow-card">
-        <h3>2. Start a Thread</h3>
-        <p>Share your coding question, project update, or launch idea.</p>
+      <article class="step-card">
+        <h3>Talk</h3>
+        <p>Open threads, reply in context, and upvote useful insights.</p>
       </article>
-      <article class="flow-card">
-        <h3>3. Collaborate</h3>
-        <p>Get replies, discuss fixes, and turn concepts into software.</p>
+      <article class="step-card">
+        <h3>Ship</h3>
+        <p>Turn conversations into software that works in production.</p>
       </article>
-    </section>
-
-    <section class="layout reveal delay-1">
-      <aside id="channels" class="card panel-left">
-        <h2>Channels</h2>
-        <ul class="channel-list">
-          <li><span>#</span>general-chat</li>
-          <li><span>#</span>web-development</li>
-          <li><span>#</span>debug-help</li>
-          <li><span>#</span>app-showcase</li>
-          <li><span>#</span>automation-lab</li>
-        </ul>
-      </aside>
-
-      <section id="feed" class="card forum-center">
-        <div class="forum-head">
-          <h2>Live Discussion Feed</h2>
-          <p>Post your idea, question, or update. Everyone can reply.</p>
-        </div>
-
-        <form id="threadForm" class="thread-form">
-          <label>
-            Thread title
-            <input type="text" name="title" required maxlength="80" placeholder="Example: How do you structure APIs for scale?" />
-            <small id="titleCount">0/80</small>
-          </label>
-          <label>
-            Your message
-            <textarea
-              name="body"
-              required
-              rows="3"
-              maxlength="500"
-              placeholder="Share details, context, and what you are trying to build."
-            ></textarea>
-            <small id="bodyCount">0/500</small>
-          </label>
-          <button class="btn btn-primary" type="submit">Create Thread</button>
-          <p id="threadNote" class="note" aria-live="polite"></p>
-        </form>
-
-        <div class="feed-tools">
-          <input id="feedSearch" type="search" placeholder="Search threads by title or text" />
-          <button id="clearSearch" class="btn btn-ghost" type="button">Clear</button>
-        </div>
-
-        <div id="threadFeed" class="thread-feed"></div>
-      </section>
-
-      <aside id="account" class="card panel-right">
-        <h2>Account</h2>
-        <div class="tabs" role="tablist" aria-label="Account forms">
-          <button class="tab active" data-tab="register" role="tab" aria-selected="true">Register</button>
-          <button class="tab" data-tab="login" role="tab" aria-selected="false">Login</button>
-        </div>
-
-        <form id="registerForm" class="auth-form active">
-          <label>
-            Name
-            <input type="text" name="name" required placeholder="Polly" />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" required placeholder="you@email.com" />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" />
-          </label>
-          <button class="btn btn-primary" type="submit">Create Account</button>
-        </form>
-
-        <form id="loginForm" class="auth-form">
-          <label>
-            Email
-            <input type="email" name="email" required placeholder="you@email.com" />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" required placeholder="Your password" />
-          </label>
-          <button class="btn btn-primary" type="submit">Login</button>
-        </form>
-
-        <div class="divider"><span>or</span></div>
-        <button id="googleBtn" class="btn btn-google" type="button">Continue with Google</button>
-        <p id="authMessage" class="note" aria-live="polite"></p>
-
-        <div id="sessionPanel" class="session" hidden>
-          <p id="sessionText"></p>
-          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
-        </div>
-
-        <div class="online-box">
-          <h3>Online now</h3>
-          <ul>
-            <li>CodeShore</li>
-            <li>TunnelByte</li>
-            <li>WaveSyntax</li>
-            <li>DebugCaptain</li>
-          </ul>
-        </div>
-      </aside>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Polly Tunnels Forum</p>
-    <a href="#top">Back to top</a>
+    <p>Polly Tunnels</p>
+    <a href="forum.html">Go to forum</a>
   </footer>
 
-  <button id="jumpToFeed" class="jump-feed" type="button" aria-label="Jump to feed">+</button>
-
-  <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
