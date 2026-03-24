@@ -1,3 +1,5 @@
+const sb = window.sb;
+
 const threadForm = document.querySelector('#threadForm');
 const threadFeed = document.querySelector('#threadFeed');
 const threadNote = document.querySelector('#threadNote');
@@ -5,11 +7,9 @@ const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
 
-const API_BASE = window.FORUM_API_BASE || 'http://localhost:8787/api';
-const TOKEN_KEY = 'polly_forum_token';
-
 let currentSort = 'hot';
-let backendAvailable = false;
+let currentUser = null;
+let currentProfile = null;
 
 const setThreadMessage = (message, isError = false) => {
   if (!threadNote) {
@@ -20,24 +20,12 @@ const setThreadMessage = (message, isError = false) => {
   threadNote.style.color = isError ? '#ffb7b7' : '#90ffd2';
 };
 
-const api = async (path, options = {}) => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+const guardSupabase = () => {
+  if (!sb) {
+    setThreadMessage(window.__supabaseInitError || 'Supabase not configured.', true);
+    return false;
   }
-
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload.error || `Request failed: ${response.status}`);
-  }
-
-  return payload;
+  return true;
 };
 
 const escapeHtml = (text) =>
@@ -50,38 +38,88 @@ const escapeHtml = (text) =>
 
 const formatTime = (value) => new Date(value).toLocaleString();
 
-const checkBackend = async () => {
-  try {
-    const data = await api('/health');
-    backendAvailable = data?.ok === true;
-  } catch {
-    backendAvailable = false;
+const hotScore = (thread) => {
+  const ageHours = Math.max((Date.now() - new Date(thread.created_at).getTime()) / 3600000, 1);
+  const replyCount = Array.isArray(thread.replies) ? thread.replies.length : 0;
+  const upvotes = Number(thread.upvote_count || 0);
+  return upvotes * 3 + replyCount * 2 - ageHours * 0.1;
+};
+
+const loadSession = async () => {
+  const {
+    data: { session }
+  } = await sb.auth.getSession();
+  currentUser = session?.user || null;
+
+  if (!currentUser) {
+    currentProfile = null;
+    return;
   }
+
+  const { data } = await sb
+    .from('profiles')
+    .select('id,display_name,email,approved,is_admin')
+    .eq('id', currentUser.id)
+    .single();
+  currentProfile = data || null;
 };
 
 const getThreads = async () => {
-  const payload = await api(`/threads?sort=${currentSort}`);
-  return payload.threads || [];
-};
+  const { data: threadRows, error: threadError } = await sb
+    .from('threads')
+    .select('id,title,body,author_id,author_name,created_at')
+    .order('created_at', { ascending: false });
 
-const createThread = async (title, body) => {
-  await api('/threads', {
-    method: 'POST',
-    body: JSON.stringify({ title, body })
-  });
-};
+  if (threadError) {
+    throw threadError;
+  }
 
-const addReply = async (threadId, text) => {
-  await api(`/threads/${threadId}/replies`, {
-    method: 'POST',
-    body: JSON.stringify({ text })
-  });
-};
+  const { data: replyRows, error: replyError } = await sb
+    .from('replies')
+    .select('id,thread_id,text,author_id,author_name,created_at')
+    .order('created_at', { ascending: true });
 
-const upvoteThread = async (threadId) => {
-  await api(`/threads/${threadId}/upvote`, {
-    method: 'POST'
+  if (replyError) {
+    throw replyError;
+  }
+
+  const { data: upvoteRows, error: upvoteError } = await sb.from('thread_upvotes').select('thread_id,user_id');
+
+  if (upvoteError) {
+    throw upvoteError;
+  }
+
+  const repliesByThread = new Map();
+  replyRows.forEach((reply) => {
+    if (!repliesByThread.has(reply.thread_id)) {
+      repliesByThread.set(reply.thread_id, []);
+    }
+    repliesByThread.get(reply.thread_id).push(reply);
   });
+
+  const upvotesByThread = new Map();
+  upvoteRows.forEach((vote) => {
+    if (!upvotesByThread.has(vote.thread_id)) {
+      upvotesByThread.set(vote.thread_id, []);
+    }
+    upvotesByThread.get(vote.thread_id).push(vote.user_id);
+  });
+
+  const combined = threadRows.map((thread) => {
+    const upvoters = upvotesByThread.get(thread.id) || [];
+    return {
+      ...thread,
+      replies: repliesByThread.get(thread.id) || [],
+      upvote_count: upvoters.length,
+      user_upvoted: currentUser ? upvoters.includes(currentUser.id) : false
+    };
+  });
+
+  if (currentSort === 'new') {
+    return combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+
+  return combined.sort((a, b) => hotScore(b) - hotScore(a));
 };
 
 const renderThreads = async () => {
@@ -92,11 +130,7 @@ const renderThreads = async () => {
   const threads = await getThreads();
   threadFeed.innerHTML = '';
 
-  const totalMessages = threads.reduce(
-    (sum, thread) => sum + 1 + (Array.isArray(thread.replies) ? thread.replies.length : 0),
-    0
-  );
-
+  const totalMessages = threads.reduce((sum, thread) => sum + 1 + thread.replies.length, 0);
   if (threadCount) {
     threadCount.textContent = String(threads.length);
   }
@@ -110,14 +144,13 @@ const renderThreads = async () => {
   }
 
   threads.forEach((thread) => {
-    const replies = Array.isArray(thread.replies) ? thread.replies : [];
-    const repliesHTML = replies
+    const repliesHTML = thread.replies
       .map(
         (reply) => `
           <article class="reply">
             <div class="reply-top">
-              <strong>${escapeHtml(reply.author)}</strong>
-              <span>${formatTime(reply.createdAt)}</span>
+              <strong>${escapeHtml(reply.author_name)}</strong>
+              <span>${formatTime(reply.created_at)}</span>
             </div>
             <p>${escapeHtml(reply.text)}</p>
           </article>
@@ -131,13 +164,13 @@ const renderThreads = async () => {
       <div class="thread-top">
         <div>
           <h3>${escapeHtml(thread.title)}</h3>
-          <span class="thread-meta">${escapeHtml(thread.author)} | ${formatTime(thread.createdAt)}</span>
+          <span class="thread-meta">${escapeHtml(thread.author_name)} | ${formatTime(thread.created_at)}</span>
         </div>
-        <span class="thread-meta">${replies.length} replies</span>
+        <span class="thread-meta">${thread.replies.length} replies</span>
       </div>
       <p>${escapeHtml(thread.body)}</p>
       <div class="thread-controls">
-        <button class="control-btn" data-action="upvote" data-thread-id="${thread.id}">Upvote (${Number(thread.upvotes || 0)})</button>
+        <button class="control-btn" data-action="upvote" data-thread-id="${thread.id}">${thread.user_upvoted ? 'Upvoted' : 'Upvote'} (${thread.upvote_count})</button>
         <button class="control-btn" data-action="collapse" data-thread-id="${thread.id}">Collapse</button>
       </div>
       <section class="replies" data-replies-id="${thread.id}">
@@ -152,27 +185,25 @@ const renderThreads = async () => {
   });
 };
 
-sortTabs.forEach((tab) => {
-  tab.addEventListener('click', async () => {
-    sortTabs.forEach((item) => {
-      item.classList.remove('active');
-      item.setAttribute('aria-selected', 'false');
-    });
-    tab.classList.add('active');
-    tab.setAttribute('aria-selected', 'true');
-    currentSort = tab.dataset.sort || 'hot';
-
-    try {
-      await renderThreads();
-    } catch (error) {
-      setThreadMessage(error.message, true);
-    }
-  });
-});
+const requireApprovedUser = () => {
+  if (!currentUser || !currentProfile) {
+    setThreadMessage('Please login from the Account page first.', true);
+    return false;
+  }
+  if (!currentProfile.approved) {
+    setThreadMessage('Your account is pending admin approval.', true);
+    return false;
+  }
+  return true;
+};
 
 if (threadForm) {
   threadForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (!guardSupabase() || !requireApprovedUser()) {
+      return;
+    }
+
     const data = new FormData(threadForm);
     const title = String(data.get('title') || '').trim();
     const body = String(data.get('body') || '').trim();
@@ -182,14 +213,21 @@ if (threadForm) {
       return;
     }
 
-    try {
-      await createThread(title, body);
-      threadForm.reset();
-      await renderThreads();
-      setThreadMessage('Thread created.');
-    } catch (error) {
+    const { error } = await sb.from('threads').insert({
+      title,
+      body,
+      author_id: currentUser.id,
+      author_name: currentProfile.display_name
+    });
+
+    if (error) {
       setThreadMessage(error.message, true);
+      return;
     }
+
+    threadForm.reset();
+    await renderThreads();
+    setThreadMessage('Thread created.');
   });
 }
 
@@ -201,18 +239,27 @@ if (threadFeed) {
     }
 
     const action = button.getAttribute('data-action');
-    const threadId = button.getAttribute('data-thread-id');
+    const threadId = Number(button.getAttribute('data-thread-id'));
     if (!action || !threadId) {
       return;
     }
 
     if (action === 'upvote') {
-      try {
-        await upvoteThread(threadId);
-        await renderThreads();
-      } catch (error) {
-        setThreadMessage(error.message, true);
+      if (!guardSupabase() || !requireApprovedUser()) {
+        return;
       }
+
+      const { error } = await sb.from('thread_upvotes').insert({
+        thread_id: threadId,
+        user_id: currentUser.id
+      });
+
+      if (error) {
+        setThreadMessage(error.message.includes('duplicate') ? 'You already upvoted this thread.' : error.message, true);
+        return;
+      }
+
+      await renderThreads();
       return;
     }
 
@@ -234,7 +281,11 @@ if (threadFeed) {
     }
 
     event.preventDefault();
-    const threadId = form.getAttribute('data-thread-id');
+    if (!guardSupabase() || !requireApprovedUser()) {
+      return;
+    }
+
+    const threadId = Number(form.getAttribute('data-thread-id'));
     const input = form.querySelector('input[name="reply"]');
     if (!threadId || !input) {
       return;
@@ -246,24 +297,57 @@ if (threadFeed) {
       return;
     }
 
+    const { error } = await sb.from('replies').insert({
+      thread_id: threadId,
+      text,
+      author_id: currentUser.id,
+      author_name: currentProfile.display_name
+    });
+
+    if (error) {
+      setThreadMessage(error.message, true);
+      return;
+    }
+
+    await renderThreads();
+    setThreadMessage('Reply posted.');
+  });
+}
+
+sortTabs.forEach((tab) => {
+  tab.addEventListener('click', async () => {
+    sortTabs.forEach((item) => {
+      item.classList.remove('active');
+      item.setAttribute('aria-selected', 'false');
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    currentSort = tab.dataset.sort || 'hot';
+
     try {
-      await addReply(threadId, text);
       await renderThreads();
-      setThreadMessage('Reply posted.');
     } catch (error) {
       setThreadMessage(error.message, true);
     }
   });
-}
+});
 
 const boot = async () => {
-  await checkBackend();
-  if (!backendAvailable) {
-    setThreadMessage('Backend not reachable. Start backend to use forum.');
+  if (!guardSupabase()) {
     return;
   }
 
-  await renderThreads();
+  try {
+    await loadSession();
+    await renderThreads();
+    if (!currentUser) {
+      setThreadMessage('Read-only mode. Login to post, reply, and upvote.');
+    } else if (currentProfile && !currentProfile.approved) {
+      setThreadMessage('Logged in, waiting for admin approval before posting.', true);
+    }
+  } catch (error) {
+    setThreadMessage(error.message, true);
+  }
 };
 
 boot();
