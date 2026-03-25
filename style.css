@@ -420,6 +420,17 @@ p {
   gap: 0.7rem;
 }
 
+.thread-form input:disabled,
+.thread-form textarea:disabled,
+.thread-form button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+#composerHint a {
+  color: var(--mint);
+}
+
 .auth-form {
   display: none;
 }

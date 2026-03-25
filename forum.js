@@ -3,6 +3,7 @@ const sb = window.sb;
 const threadForm = document.querySelector('#threadForm');
 const threadFeed = document.querySelector('#threadFeed');
 const threadNote = document.querySelector('#threadNote');
+const composerHint = document.querySelector('#composerHint');
 const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
@@ -15,6 +16,10 @@ let currentUser = null;
 let currentProfile = null;
 let activeTopic = 'all';
 let allThreads = [];
+
+const threadTitleInput = threadForm?.querySelector('input[name="title"]');
+const threadBodyInput = threadForm?.querySelector('textarea[name="body"]');
+const threadSubmitBtn = threadForm?.querySelector('button[type="submit"]');
 
 const setThreadMessage = (message, isError = false) => {
   if (!threadNote) {
@@ -217,6 +222,39 @@ const requireApprovedUser = () => {
   return true;
 };
 
+const updateComposerAccess = () => {
+  if (!threadForm || !threadTitleInput || !threadBodyInput || !threadSubmitBtn) {
+    return;
+  }
+
+  if (!currentUser) {
+    threadTitleInput.disabled = true;
+    threadBodyInput.disabled = true;
+    threadSubmitBtn.disabled = true;
+    if (composerHint) {
+      composerHint.innerHTML = 'Login from <a href="account.html">Account</a> to create threads.';
+    }
+    return;
+  }
+
+  if (currentProfile && !currentProfile.approved) {
+    threadTitleInput.disabled = true;
+    threadBodyInput.disabled = true;
+    threadSubmitBtn.disabled = true;
+    if (composerHint) {
+      composerHint.textContent = 'Your account is pending admin approval before posting.';
+    }
+    return;
+  }
+
+  threadTitleInput.disabled = false;
+  threadBodyInput.disabled = false;
+  threadSubmitBtn.disabled = false;
+  if (composerHint) {
+    composerHint.textContent = 'You can post new threads now.';
+  }
+};
+
 if (threadForm) {
   threadForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -395,6 +433,7 @@ const boot = async () => {
 
   try {
     await loadSession();
+    updateComposerAccess();
     await renderThreads();
     if (!currentUser) {
       setThreadMessage('Read-only mode. Login to post, reply, and upvote.');
@@ -405,5 +444,17 @@ const boot = async () => {
     setThreadMessage(error.message, true);
   }
 };
+
+if (sb?.auth?.onAuthStateChange) {
+  sb.auth.onAuthStateChange(async () => {
+    try {
+      await loadSession();
+      updateComposerAccess();
+      await renderThreads();
+    } catch (error) {
+      setThreadMessage(error.message, true);
+    }
+  });
+}
 
 boot();
