@@ -11,6 +11,13 @@ const authMessage = document.querySelector('#authMessage');
 const sessionPanel = document.querySelector('#sessionPanel');
 const sessionText = document.querySelector('#sessionText');
 const logoutBtn = document.querySelector('#logoutBtn');
+const profileForm = document.querySelector('#profileForm');
+const profileName = document.querySelector('#profileName');
+const profileEmail = document.querySelector('#profileEmail');
+const passwordForm = document.querySelector('#passwordForm');
+const newPassword = document.querySelector('#newPassword');
+const confirmPassword = document.querySelector('#confirmPassword');
+const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
 const authTabs = document.querySelectorAll('.auth-tab');
 const forms = document.querySelectorAll('.auth-form');
 
@@ -142,6 +149,12 @@ const renderSession = async () => {
     setAuthUiForSession(true);
     sessionPanel.hidden = false;
     sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;
+    if (profileName) {
+      profileName.value = profile.display_name || '';
+    }
+    if (profileEmail) {
+      profileEmail.value = profile.email || '';
+    }
   } catch (error) {
     setAuthUiForSession(false);
     sessionPanel.hidden = true;
@@ -316,6 +329,98 @@ if (logoutBtn) {
     await sb.auth.signOut();
     await renderSession();
     setMessage('Logged out.');
+  });
+}
+
+if (profileForm) {
+  profileForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const name = String(profileName?.value || '').trim();
+    if (!name) {
+      setMessage('Display name is required.', true);
+      return;
+    }
+
+    const { error } = await sb
+      .from('profiles')
+      .update({ display_name: name })
+      .eq('id', session.user.id);
+
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    setMessage('Profile updated successfully.');
+    await renderSession();
+  });
+}
+
+if (passwordForm) {
+  passwordForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const password = String(newPassword?.value || '');
+    const confirm = String(confirmPassword?.value || '');
+
+    if (password.length < 6) {
+      setMessage('Password must be at least 6 characters.', true);
+      return;
+    }
+
+    if (password !== confirm) {
+      setMessage('Passwords do not match.', true);
+      return;
+    }
+
+    const { error } = await sb.auth.updateUser({ password });
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    passwordForm.reset();
+    setMessage('Password changed successfully.');
+  });
+}
+
+if (linkGoogleBtn) {
+  linkGoogleBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+
+    if (typeof sb.auth.linkIdentity !== 'function') {
+      setMessage('Google account linking is not supported in this browser session.', true);
+      return;
+    }
+
+    const { error } = await sb.auth.linkIdentity({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/account.html`
+      }
+    });
+
+    if (error) {
+      setMessage(error.message, true);
+    }
   });
 }
 

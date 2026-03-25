@@ -67,6 +67,27 @@
           <a class="btn btn-ghost" href="forum.html">Open Forum</a>
           <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
         </div>
+
+        <section class="profile-box">
+          <h3>Profile Settings</h3>
+          <form id="profileForm" class="settings-form">
+            <label>Display name <input id="profileName" name="display_name" required maxlength="40" /></label>
+            <label>Email <input id="profileEmail" type="email" disabled /></label>
+            <button class="btn btn-primary" type="submit">Save Profile</button>
+          </form>
+        </section>
+
+        <section class="profile-box">
+          <h3>Security</h3>
+          <form id="passwordForm" class="settings-form">
+            <label>New password <input id="newPassword" type="password" minlength="6" required placeholder="At least 6 characters" /></label>
+            <label>Confirm password <input id="confirmPassword" type="password" minlength="6" required placeholder="Repeat new password" /></label>
+            <button class="btn btn-primary" type="submit">Change Password</button>
+          </form>
+          <div class="settings-form">
+            <button id="linkGoogleBtn" class="btn btn-ghost" type="button">Link Google Account</button>
+          </div>
+        </section>
       </div>
     </section>
 

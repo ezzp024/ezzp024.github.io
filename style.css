@@ -669,6 +669,23 @@ textarea {
   flex-wrap: wrap;
 }
 
+.profile-box {
+  margin-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+}
+
+.settings-form {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.settings-form input:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .account-grid {
   margin-top: 2rem;
   display: grid;
