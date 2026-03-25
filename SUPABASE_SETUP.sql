@@ -95,6 +95,13 @@ to authenticated
 using (auth.uid() = id)
 with check (auth.uid() = id);
 
+drop policy if exists "profiles self insert" on public.profiles;
+create policy "profiles self insert"
+on public.profiles
+for insert
+to authenticated
+with check (auth.uid() = id);
+
 drop policy if exists "profiles admin update" on public.profiles;
 create policy "profiles admin update"
 on public.profiles

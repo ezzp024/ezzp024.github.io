@@ -248,10 +248,12 @@ const renderSession = async () => {
     return;
   }
 
+  // If we have a session, never show register/login UI.
+  setUiForLoggedState(true);
+
   try {
     await ensureProfile(session.user);
     const profile = await getProfile(session.user.id);
-    setUiForLoggedState(true);
     setAccountPanel('profile');
 
     if (sessionText) {
@@ -266,8 +268,17 @@ const renderSession = async () => {
 
     await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
   } catch (error) {
-    setUiForLoggedState(false);
-    setMessage(error.message || 'Could not load account session.', true);
+    // Keep account view visible even if profile/network queries fail.
+    if (sessionText) {
+      sessionText.textContent = `Logged in as ${session.user.email || 'member'} | Profile sync issue`;
+    }
+    if (networkStats) {
+      networkStats.textContent = 'Profile data is still syncing. Try refresh in a moment.';
+    }
+    if (activityStats) {
+      activityStats.textContent = 'Activity data will appear after profile sync.';
+    }
+    setMessage(error.message || 'Could not fully load account data yet.', true);
   }
 };
 
@@ -586,6 +597,12 @@ if (logoutBtn) {
     await sb.auth.signOut();
     setMessage('Logged out.');
     await renderSession();
+  });
+}
+
+if (sb?.auth?.onAuthStateChange) {
+  sb.auth.onAuthStateChange(() => {
+    renderSession();
   });
 }
 
