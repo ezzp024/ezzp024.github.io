@@ -5,6 +5,8 @@ const loginForm = document.querySelector('#loginForm');
 const sendCodeBtn = document.querySelector('#sendCodeBtn');
 const googleBtn = document.querySelector('#googleBtn');
 const googleFallbackBtn = document.querySelector('#googleFallbackBtn');
+const authTabsWrap = document.querySelector('.sort-tabs');
+const divider = document.querySelector('.divider');
 const authMessage = document.querySelector('#authMessage');
 const sessionPanel = document.querySelector('#sessionPanel');
 const sessionText = document.querySelector('#sessionText');
@@ -33,6 +35,32 @@ const setFormActive = (tabName) => {
   forms.forEach((form) => {
     form.classList.toggle('active', form.id === `${tabName}Form`);
   });
+};
+
+const setAuthUiForSession = (loggedIn) => {
+  if (authTabsWrap) {
+    authTabsWrap.hidden = loggedIn;
+  }
+
+  if (divider) {
+    divider.hidden = loggedIn;
+  }
+
+  if (registerForm) {
+    registerForm.hidden = loggedIn;
+  }
+
+  if (loginForm) {
+    loginForm.hidden = loggedIn;
+  }
+
+  if (googleBtn) {
+    googleBtn.hidden = loggedIn;
+  }
+
+  if (googleFallbackBtn) {
+    googleFallbackBtn.hidden = loggedIn;
+  }
 };
 
 const getDraft = () => {
@@ -102,6 +130,7 @@ const renderSession = async () => {
   } = await sb.auth.getSession();
 
   if (!session?.user) {
+    setAuthUiForSession(false);
     sessionPanel.hidden = true;
     sessionText.textContent = '';
     return;
@@ -110,9 +139,11 @@ const renderSession = async () => {
   try {
     await ensureProfile(session.user);
     const profile = await getProfile(session.user.id);
+    setAuthUiForSession(true);
     sessionPanel.hidden = false;
     sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;
   } catch (error) {
+    setAuthUiForSession(false);
     sessionPanel.hidden = true;
     sessionText.textContent = '';
     setMessage(error.message || 'Could not load profile.', true);
