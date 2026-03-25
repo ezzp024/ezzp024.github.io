@@ -6,10 +6,15 @@ const threadNote = document.querySelector('#threadNote');
 const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
+const feedSearch = document.querySelector('#feedSearch');
+const clearSearchBtn = document.querySelector('#clearSearchBtn');
+const topicChips = document.querySelectorAll('.chip');
 
 let currentSort = 'hot';
 let currentUser = null;
 let currentProfile = null;
+let activeTopic = 'all';
+let allThreads = [];
 
 const setThreadMessage = (message, isError = false) => {
   if (!threadNote) {
@@ -127,19 +132,30 @@ const renderThreads = async () => {
     return;
   }
 
-  const threads = await getThreads();
+  allThreads = await getThreads();
+  const keyword = String(feedSearch?.value || '').trim().toLowerCase();
+  const threads = allThreads.filter((thread) => {
+    const haystack = `${thread.title} ${thread.body} ${thread.author_name}`.toLowerCase();
+    const keywordMatch = !keyword || haystack.includes(keyword);
+    const topicMatch = activeTopic === 'all' || haystack.includes(activeTopic);
+    return keywordMatch && topicMatch;
+  });
+
   threadFeed.innerHTML = '';
 
-  const totalMessages = threads.reduce((sum, thread) => sum + 1 + thread.replies.length, 0);
+  const totalMessages = allThreads.reduce((sum, thread) => sum + 1 + thread.replies.length, 0);
   if (threadCount) {
-    threadCount.textContent = String(threads.length);
+    threadCount.textContent = String(allThreads.length);
   }
   if (messageCount) {
     messageCount.textContent = String(totalMessages);
   }
 
   if (threads.length === 0) {
-    threadFeed.innerHTML = '<p class="note">No threads yet. Start the first one.</p>';
+    threadFeed.innerHTML =
+      allThreads.length === 0
+        ? '<p class="note">No threads yet. Start the first one.</p>'
+        : '<p class="note">No threads match your current filters.</p>';
     return;
   }
 
@@ -160,11 +176,15 @@ const renderThreads = async () => {
 
     const item = document.createElement('article');
     item.className = 'thread';
+    const authorInitial = escapeHtml(String(thread.author_name || 'M').charAt(0).toUpperCase());
     item.innerHTML = `
       <div class="thread-top">
-        <div>
+        <div class="thread-author-row">
+          <span class="avatar">${authorInitial}</span>
+          <div>
           <h3>${escapeHtml(thread.title)}</h3>
           <span class="thread-meta">${escapeHtml(thread.author_name)} | ${formatTime(thread.created_at)}</span>
+          </div>
         </div>
         <span class="thread-meta">${thread.replies.length} replies</span>
       </div>
@@ -313,6 +333,42 @@ if (threadFeed) {
     setThreadMessage('Reply posted.');
   });
 }
+
+if (feedSearch) {
+  feedSearch.addEventListener('input', async () => {
+    try {
+      await renderThreads();
+    } catch (error) {
+      setThreadMessage(error.message, true);
+    }
+  });
+}
+
+if (clearSearchBtn && feedSearch) {
+  clearSearchBtn.addEventListener('click', async () => {
+    feedSearch.value = '';
+    try {
+      await renderThreads();
+      feedSearch.focus();
+    } catch (error) {
+      setThreadMessage(error.message, true);
+    }
+  });
+}
+
+topicChips.forEach((chip) => {
+  chip.addEventListener('click', async () => {
+    topicChips.forEach((item) => item.classList.remove('active'));
+    chip.classList.add('active');
+    activeTopic = chip.dataset.topic || 'all';
+
+    try {
+      await renderThreads();
+    } catch (error) {
+      setThreadMessage(error.message, true);
+    }
+  });
+});
 
 sortTabs.forEach((tab) => {
   tab.addEventListener('click', async () => {

@@ -250,6 +250,36 @@ p {
   gap: 0.8rem;
 }
 
+.social-strip {
+  margin-top: 1rem;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.social-links a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.42rem 0.8rem;
+  text-decoration: none;
+  color: #cce8ff;
+  background: rgba(8, 24, 42, 0.65);
+}
+
+.social-links a:hover {
+  color: var(--mint);
+  border-color: rgba(131, 255, 216, 0.5);
+}
+
 .step-card {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -324,6 +354,37 @@ p {
   justify-content: space-between;
   gap: 0.8rem;
   flex-wrap: wrap;
+}
+
+.feed-tools {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+}
+
+.topic-chips {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(8, 26, 46, 0.7);
+  color: #c6e1f5;
+  padding: 0.28rem 0.7rem;
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.chip.active,
+.chip:hover {
+  border-color: rgba(131, 255, 216, 0.5);
+  color: var(--mint);
 }
 
 .sort-tabs {
@@ -461,6 +522,26 @@ textarea {
   gap: 0.8rem;
 }
 
+.thread-author-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(131, 255, 216, 0.5);
+  background: linear-gradient(150deg, rgba(67, 213, 255, 0.35), rgba(131, 255, 216, 0.22));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #dbf7ff;
+  flex: 0 0 auto;
+}
+
 .thread-meta {
   font-size: 0.82rem;
   color: #88bcdf;
@@ -581,6 +662,58 @@ textarea {
   background: rgba(7, 20, 35, 0.76);
 }
 
+.session-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.account-grid {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.account-sub {
+  margin-top: 0.55rem;
+}
+
+.account-side {
+  padding: 1rem;
+}
+
+.benefit-list {
+  margin: 0.85rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #b9d8ef;
+}
+
+.social-stack {
+  margin-top: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.8rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.social-stack a {
+  text-decoration: none;
+  color: #c8e7ff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  background: rgba(8, 23, 41, 0.62);
+}
+
+.social-stack a:hover {
+  color: var(--mint);
+}
+
 .admin-actions {
   margin-top: 0.8rem;
 }
@@ -639,8 +772,14 @@ textarea {
 @media (max-width: 1080px) {
   .steps,
   .forum-layout,
-  .forum-hero {
+  .forum-hero,
+  .social-strip,
+  .account-grid {
     grid-template-columns: 1fr;
+  }
+
+  .social-links {
+    justify-content: flex-start;
   }
 }
 
@@ -679,6 +818,10 @@ textarea {
 
   .reply-form {
     flex-direction: column;
+  }
+
+  .feed-tools {
+    grid-template-columns: 1fr;
   }
 
   .admin-item {

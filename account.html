@@ -31,10 +31,11 @@
     </nav>
   </header>
 
-  <main class="account-main">
+  <main class="account-main account-grid">
     <section class="account-wrap card reveal">
       <p class="tag">Profile Access</p>
       <h1>Register or Login</h1>
+      <p class="account-sub">Secure sign-in, email verification, and approval workflow for trusted members.</p>
       <div class="sort-tabs" role="tablist" aria-label="Account tabs">
         <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
         <button class="auth-tab" data-auth-tab="login" role="tab" aria-selected="false">Login</button>
@@ -62,9 +63,30 @@
 
       <div id="sessionPanel" class="session" hidden>
         <p id="sessionText"></p>
-        <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        <div class="session-actions">
+          <a class="btn btn-ghost" href="forum.html">Open Forum</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
       </div>
     </section>
+
+    <aside class="card account-side reveal delay-1">
+      <p class="tag">Community Access</p>
+      <h2>Why Create an Account</h2>
+      <ul class="benefit-list">
+        <li>Post threads and get high-quality technical feedback.</li>
+        <li>Reply with context-rich solutions in active discussions.</li>
+        <li>Upvote strong answers to improve feed quality.</li>
+        <li>Build a trusted profile in Polly Tunnels community.</li>
+      </ul>
+
+      <div class="social-stack account-social">
+        <h3>Social Presence</h3>
+        <a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://discord.com" target="_blank" rel="noreferrer">Discord</a>
+        <a href="https://x.com" target="_blank" rel="noreferrer">X / Updates</a>
+      </div>
+    </aside>
   </main>
 
   <footer class="footer">
