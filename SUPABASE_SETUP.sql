@@ -11,6 +11,8 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists avatar_url text;
+
 create table if not exists public.threads (
   id bigint generated always as identity primary key,
   author_id uuid not null references public.profiles(id) on delete cascade,
@@ -42,6 +44,17 @@ create table if not exists public.follows (
   created_at timestamptz not null default now(),
   primary key (follower_id, following_id),
   check (follower_id <> following_id)
+);
+
+create table if not exists public.notifications (
+  id bigint generated always as identity primary key,
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  actor_id uuid references public.profiles(id) on delete set null,
+  kind text not null,
+  message text not null,
+  thread_id bigint references public.threads(id) on delete set null,
+  is_read boolean not null default false,
+  created_at timestamptz not null default now()
 );
 
 create or replace function public.handle_new_user()
@@ -79,12 +92,13 @@ alter table public.threads enable row level security;
 alter table public.replies enable row level security;
 alter table public.thread_upvotes enable row level security;
 alter table public.follows enable row level security;
+alter table public.notifications enable row level security;
 
 drop policy if exists "profiles read all auth" on public.profiles;
 create policy "profiles read all auth"
 on public.profiles
 for select
-to authenticated
+to anon, authenticated
 using (true);
 
 drop policy if exists "profiles self update" on public.profiles;
@@ -206,6 +220,66 @@ on public.follows
 for delete
 to authenticated
 using (follower_id = auth.uid());
+
+drop policy if exists "notifications read own" on public.notifications;
+create policy "notifications read own"
+on public.notifications
+for select
+to authenticated
+using (recipient_id = auth.uid());
+
+drop policy if exists "notifications update own" on public.notifications;
+create policy "notifications update own"
+on public.notifications
+for update
+to authenticated
+using (recipient_id = auth.uid())
+with check (recipient_id = auth.uid());
+
+drop policy if exists "notifications insert actor" on public.notifications;
+create policy "notifications insert actor"
+on public.notifications
+for insert
+to authenticated
+with check (
+  actor_id = auth.uid()
+  and recipient_id is not null
+);
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+drop policy if exists "avatars read public" on storage.objects;
+create policy "avatars read public"
+on storage.objects
+for select
+to public
+using (bucket_id = 'avatars');
+
+drop policy if exists "avatars upload own" on storage.objects;
+create policy "avatars upload own"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "avatars update own" on storage.objects;
+create policy "avatars update own"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- Run this once to promote your admin account after signup:
 -- update public.profiles

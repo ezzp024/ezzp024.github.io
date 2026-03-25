@@ -611,6 +611,16 @@ textarea {
   font-weight: 700;
   color: #dbf7ff;
   flex: 0 0 auto;
+  object-fit: cover;
+}
+
+.author-link {
+  color: #bfe6ff;
+  text-decoration: none;
+}
+
+.author-link:hover {
+  color: var(--mint);
 }
 
 .thread-meta {
@@ -836,6 +846,28 @@ textarea {
   gap: 0.5rem;
 }
 
+.mini-item.unread {
+  border-color: rgba(131, 255, 216, 0.55);
+  box-shadow: 0 0 0 1px rgba(131, 255, 216, 0.2) inset;
+}
+
+.profile-avatar-row {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.profile-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: rgba(8, 23, 41, 0.65);
+}
+
 .account-grid {
   margin-top: 2rem;
   display: grid;
@@ -1009,6 +1041,10 @@ textarea {
   }
 
   .list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-avatar-row {
     grid-template-columns: 1fr;
   }
 

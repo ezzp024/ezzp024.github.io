@@ -48,6 +48,13 @@ const escapeHtml = (text) =>
 
 const formatTime = (value) => new Date(value).toLocaleString();
 
+const normalizeName = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const extractMentionTokens = (text) => {
+  const matches = String(text || '').match(/@([a-zA-Z0-9._-]{2,30})/g) || [];
+  return [...new Set(matches.map((item) => item.slice(1).toLowerCase()))];
+};
+
 const hotScore = (thread) => {
   const ageHours = Math.max((Date.now() - new Date(thread.created_at).getTime()) / 3600000, 1);
   const replyCount = Array.isArray(thread.replies) ? thread.replies.length : 0;
@@ -99,6 +106,13 @@ const getThreads = async () => {
     throw upvoteError;
   }
 
+  const authorIds = [...new Set([...threadRows.map((item) => item.author_id), ...replyRows.map((item) => item.author_id)])];
+  const { data: authorProfiles } = authorIds.length
+    ? await sb.from('profiles').select('id,display_name,avatar_url').in('id', authorIds)
+    : { data: [] };
+
+  const profileById = new Map((authorProfiles || []).map((profile) => [profile.id, profile]));
+
   const repliesByThread = new Map();
   replyRows.forEach((reply) => {
     if (!repliesByThread.has(reply.thread_id)) {
@@ -117,9 +131,18 @@ const getThreads = async () => {
 
   const combined = threadRows.map((thread) => {
     const upvoters = upvotesByThread.get(thread.id) || [];
+    const authorProfile = profileById.get(thread.author_id) || null;
+    const replies = (repliesByThread.get(thread.id) || []).map((reply) => {
+      const replyProfile = profileById.get(reply.author_id) || null;
+      return {
+        ...reply,
+        author_avatar_url: replyProfile?.avatar_url || ''
+      };
+    });
     return {
       ...thread,
-      replies: repliesByThread.get(thread.id) || [],
+      replies,
+      author_avatar_url: authorProfile?.avatar_url || '',
       upvote_count: upvoters.length,
       user_upvoted: currentUser ? upvoters.includes(currentUser.id) : false
     };
@@ -171,7 +194,7 @@ const renderThreads = async () => {
         (reply) => `
           <article class="reply">
             <div class="reply-top">
-              <strong>${escapeHtml(reply.author_name)}</strong>
+              <strong><a class="author-link" href="user.html?id=${encodeURIComponent(reply.author_id)}">${escapeHtml(reply.author_name)}</a></strong>
               <span>${formatTime(reply.created_at)}</span>
             </div>
             <p>${escapeHtml(reply.text)}</p>
@@ -183,13 +206,16 @@ const renderThreads = async () => {
     const item = document.createElement('article');
     item.className = 'thread';
     const authorInitial = escapeHtml(String(thread.author_name || 'M').charAt(0).toUpperCase());
+    const avatarVisual = thread.author_avatar_url
+      ? `<img class="avatar" src="${escapeHtml(thread.author_avatar_url)}" alt="${escapeHtml(thread.author_name)}" />`
+      : `<span class="avatar">${authorInitial}</span>`;
     item.innerHTML = `
       <div class="thread-top">
         <div class="thread-author-row">
-          <span class="avatar">${authorInitial}</span>
+          ${avatarVisual}
           <div>
           <h3>${escapeHtml(thread.title)}</h3>
-          <span class="thread-meta">${escapeHtml(thread.author_name)} | ${formatTime(thread.created_at)}</span>
+          <span class="thread-meta"><a class="author-link" href="user.html?id=${encodeURIComponent(thread.author_id)}">${escapeHtml(thread.author_name)}</a> | ${formatTime(thread.created_at)}</span>
           </div>
         </div>
         <span class="thread-meta">${thread.replies.length} replies</span>
@@ -272,16 +298,42 @@ if (threadForm) {
       return;
     }
 
-    const { error } = await sb.from('threads').insert({
-      title,
-      body,
-      author_id: currentUser.id,
-      author_name: currentProfile.display_name
-    });
+    const { data: insertedThread, error } = await sb
+      .from('threads')
+      .insert({
+        title,
+        body,
+        author_id: currentUser.id,
+        author_name: currentProfile.display_name
+      })
+      .select('id,title')
+      .single();
 
     if (error) {
       setThreadMessage(error.message, true);
       return;
+    }
+
+    const tokens = extractMentionTokens(`${title} ${body}`);
+    if (tokens.length > 0 && insertedThread) {
+      const { data: allProfiles } = await sb.from('profiles').select('id,display_name');
+      const mentions = (allProfiles || []).filter((profile) => {
+        if (profile.id === currentUser.id) {
+          return false;
+        }
+        return tokens.includes(normalizeName(profile.display_name));
+      });
+
+      if (mentions.length > 0) {
+        const rows = mentions.map((profile) => ({
+          recipient_id: profile.id,
+          actor_id: currentUser.id,
+          kind: 'mention',
+          thread_id: insertedThread.id,
+          message: `${currentProfile.display_name} mentioned you in a thread.`
+        }));
+        await sb.from('notifications').insert(rows);
+      }
     }
 
     threadForm.reset();
@@ -366,6 +418,39 @@ if (threadFeed) {
     if (error) {
       setThreadMessage(error.message, true);
       return;
+    }
+
+    const thread = allThreads.find((item) => item.id === threadId);
+    if (thread && thread.author_id !== currentUser.id) {
+      await sb.from('notifications').insert({
+        recipient_id: thread.author_id,
+        actor_id: currentUser.id,
+        kind: 'reply',
+        thread_id: threadId,
+        message: `${currentProfile.display_name} replied to your thread: ${thread.title}`
+      });
+    }
+
+    const tokens = extractMentionTokens(text);
+    if (tokens.length > 0) {
+      const { data: allProfiles } = await sb.from('profiles').select('id,display_name');
+      const mentions = (allProfiles || []).filter((profile) => {
+        if (profile.id === currentUser.id) {
+          return false;
+        }
+        return tokens.includes(normalizeName(profile.display_name));
+      });
+
+      if (mentions.length > 0) {
+        const rows = mentions.map((profile) => ({
+          recipient_id: profile.id,
+          actor_id: currentUser.id,
+          kind: 'mention',
+          thread_id: threadId,
+          message: `${currentProfile.display_name} mentioned you in a reply.`
+        }));
+        await sb.from('notifications').insert(rows);
+      }
     }
 
     await renderThreads();

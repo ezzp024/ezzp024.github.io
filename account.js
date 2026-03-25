@@ -16,6 +16,9 @@ const logoutBtn = document.querySelector('#logoutBtn');
 const profileForm = document.querySelector('#profileForm');
 const profileName = document.querySelector('#profileName');
 const profileEmail = document.querySelector('#profileEmail');
+const avatarForm = document.querySelector('#avatarForm');
+const avatarInput = document.querySelector('#avatarInput');
+const profileAvatar = document.querySelector('#profileAvatar');
 const passwordForm = document.querySelector('#passwordForm');
 const newPassword = document.querySelector('#newPassword');
 const confirmPassword = document.querySelector('#confirmPassword');
@@ -31,6 +34,9 @@ const followersList = document.querySelector('#followersList');
 const activityStats = document.querySelector('#activityStats');
 const myThreads = document.querySelector('#myThreads');
 const likedThreads = document.querySelector('#likedThreads');
+const notificationsList = document.querySelector('#notificationsList');
+const refreshNotificationsBtn = document.querySelector('#refreshNotificationsBtn');
+const markReadBtn = document.querySelector('#markReadBtn');
 const manageBillingBtn = document.querySelector('#manageBillingBtn');
 const billingForm = document.querySelector('#billingForm');
 const cardLast4 = document.querySelector('#cardLast4');
@@ -107,7 +113,7 @@ const setAccountPanel = (panelName) => {
 
 const getPanelFromHash = () => {
   const value = window.location.hash.replace('#', '').trim();
-  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity']);
+  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity', 'notifications']);
   return valid.has(value) ? value : 'profile';
 };
 
@@ -184,7 +190,7 @@ const ensureProfile = async (user, fallbackName = '') => {
 const getProfile = async (userId) => {
   const { data, error } = await sb
     .from('profiles')
-    .select('id,email,display_name,approved,is_admin')
+    .select('id,email,display_name,avatar_url,approved,is_admin')
     .eq('id', userId)
     .single();
 
@@ -192,6 +198,52 @@ const getProfile = async (userId) => {
     throw error;
   }
   return data;
+};
+
+const renderAvatar = (url, displayName) => {
+  if (!profileAvatar) {
+    return;
+  }
+
+  if (url) {
+    profileAvatar.src = url;
+    return;
+  }
+
+  const initial = encodeURIComponent(String(displayName || 'U').charAt(0).toUpperCase());
+  profileAvatar.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%230b2948'/><text x='50%' y='55%' text-anchor='middle' font-family='Arial' font-size='52' fill='%2383ffd8'>${initial}</text></svg>`;
+};
+
+const loadNotifications = async (userId) => {
+  if (!notificationsList) {
+    return;
+  }
+
+  const { data, error } = await sb
+    .from('notifications')
+    .select('id,kind,message,is_read,created_at,thread_id')
+    .eq('recipient_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(40);
+
+  if (error) {
+    notificationsList.innerHTML = '<p class="note">Notifications setup pending. Run SUPABASE_SETUP.sql again.</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    notificationsList.innerHTML = '<p class="note">No notifications yet.</p>';
+    return;
+  }
+
+  notificationsList.innerHTML = data
+    .map((item) => {
+      const unread = item.is_read ? '' : ' unread';
+      const action = item.thread_id ? '<a class="control-btn" href="forum.html">Open</a>' : '';
+      const text = item.message || item.kind;
+      return `<div class="mini-item${unread}"><span>${text} - ${new Date(item.created_at).toLocaleString()}</span>${action}</div>`;
+    })
+    .join('');
 };
 
 const loadNetwork = async (userId) => {
@@ -331,8 +383,9 @@ const renderSession = async () => {
     if (profileEmail) {
       profileEmail.value = profile.email || '';
     }
+    renderAvatar(profile.avatar_url, profile.display_name);
 
-    await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
+    await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id), loadNotifications(session.user.id)]);
     renderBilling(session.user.id);
   } catch (error) {
     // Keep account view visible even if profile/network queries fail.
@@ -515,6 +568,54 @@ if (profileForm) {
   });
 }
 
+if (avatarForm) {
+  avatarForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const file = avatarInput?.files?.[0];
+    if (!file) {
+      setMessage('Select an image first.', true);
+      return;
+    }
+
+    const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '');
+    const path = `${session.user.id}/${Date.now()}-${cleanName}`;
+
+    const { error: uploadError } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+    if (uploadError) {
+      setMessage(uploadError.message, true);
+      return;
+    }
+
+    const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(path);
+    const avatarUrl = publicUrlData?.publicUrl || '';
+
+    const { error: profileError } = await sb
+      .from('profiles')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', session.user.id);
+
+    if (profileError) {
+      setMessage(profileError.message, true);
+      return;
+    }
+
+    renderAvatar(avatarUrl, profileName?.value || 'U');
+    setMessage('Avatar uploaded successfully.');
+  });
+}
+
 if (passwordForm) {
   passwordForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -666,6 +767,12 @@ if (followForm) {
 
     followForm.reset();
     setMessage(`You are now following ${target.display_name}.`);
+    await sb.from('notifications').insert({
+      recipient_id: target.id,
+      actor_id: session.user.id,
+      kind: 'follow',
+      message: `${session.user.email} followed you.`
+    });
     await loadNetwork(session.user.id);
   });
 }
@@ -703,6 +810,43 @@ if (followingList) {
 
     setMessage('User unfollowed.');
     await loadNetwork(session.user.id);
+  });
+}
+
+if (markReadBtn) {
+  markReadBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+
+    await sb.from('notifications').update({ is_read: true }).eq('recipient_id', session.user.id);
+    await loadNotifications(session.user.id);
+    setMessage('Notifications marked as read.');
+  });
+}
+
+if (refreshNotificationsBtn) {
+  refreshNotificationsBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+
+    await loadNotifications(session.user.id);
+    setMessage('Notifications refreshed.');
   });
 }
 

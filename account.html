@@ -77,10 +77,18 @@
           <button class="account-tab" data-panel="billing" type="button">Payment</button>
           <button class="account-tab" data-panel="network" type="button">Friends</button>
           <button class="account-tab" data-panel="activity" type="button">Threads</button>
+          <button class="account-tab" data-panel="notifications" type="button">Notifications</button>
         </div>
 
         <section class="profile-box account-panel active" data-panel="profile">
           <h3>Profile</h3>
+          <div class="profile-avatar-row">
+            <img id="profileAvatar" class="profile-avatar" alt="Profile avatar" />
+            <form id="avatarForm" class="settings-form">
+              <label>Upload avatar <input id="avatarInput" type="file" accept="image/*" /></label>
+              <button class="btn btn-ghost" type="submit">Upload Avatar</button>
+            </form>
+          </div>
           <form id="profileForm" class="settings-form">
             <label>Display name <input id="profileName" name="display_name" required maxlength="40" /></label>
             <label>Email <input id="profileEmail" type="email" disabled /></label>
@@ -154,6 +162,15 @@
               <div id="likedThreads" class="mini-list"></div>
             </div>
           </div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="notifications">
+          <h3>Notifications</h3>
+          <div class="session-actions">
+            <button id="refreshNotificationsBtn" class="btn btn-ghost" type="button">Refresh</button>
+            <button id="markReadBtn" class="btn btn-ghost" type="button">Mark all read</button>
+          </div>
+          <div id="notificationsList" class="mini-list"></div>
         </section>
       </div>
     </section>
