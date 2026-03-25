@@ -232,7 +232,7 @@ const loadActivity = async (userId) => {
 
 const renderSession = async () => {
   if (!guardSupabase()) {
-    setUiForLoggedState(false);
+    // Keep guest auth hidden to avoid showing register/login by mistake.
     return;
   }
 
@@ -606,4 +606,6 @@ if (sb?.auth?.onAuthStateChange) {
   });
 }
 
+// Prevent auth UI flicker on navigation/refresh.
+setUiForLoggedState(true);
 renderSession();
