@@ -36,29 +36,32 @@
       <p class="tag">Profile Access</p>
       <h1>Register or Login</h1>
       <p class="account-sub">Secure sign-in, email verification, and approval workflow for trusted members.</p>
-      <div class="sort-tabs" role="tablist" aria-label="Account tabs">
-        <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
-        <button class="auth-tab" data-auth-tab="login" role="tab" aria-selected="false">Login</button>
+      <div id="guestAuthSection" hidden>
+        <div class="sort-tabs" role="tablist" aria-label="Account tabs">
+          <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
+          <button class="auth-tab" data-auth-tab="login" role="tab" aria-selected="false">Login</button>
+        </div>
+
+        <form id="registerForm" class="auth-form active">
+          <label>Name <input name="name" required placeholder="Polly" /></label>
+          <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
+          <label>Password <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" /></label>
+          <button id="sendCodeBtn" class="btn btn-ghost" type="button">Send Verification Code</button>
+          <label>Verification code <input name="code" inputmode="numeric" minlength="6" maxlength="6" placeholder="6-digit code from email" /></label>
+          <button class="btn btn-primary" type="submit">Verify and Create Account</button>
+        </form>
+
+        <form id="loginForm" class="auth-form">
+          <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
+          <label>Password <input type="password" name="password" required placeholder="Your password" /></label>
+          <button class="btn btn-primary" type="submit">Login</button>
+        </form>
+
+        <div class="divider"><span>or</span></div>
+        <div id="googleBtn" class="google-button-wrap"></div>
+        <button id="googleFallbackBtn" class="btn btn-google" type="button">Continue with Google</button>
       </div>
 
-      <form id="registerForm" class="auth-form active">
-        <label>Name <input name="name" required placeholder="Polly" /></label>
-        <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
-        <label>Password <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" /></label>
-        <button id="sendCodeBtn" class="btn btn-ghost" type="button">Send Verification Code</button>
-        <label>Verification code <input name="code" inputmode="numeric" minlength="6" maxlength="6" placeholder="6-digit code from email" /></label>
-        <button class="btn btn-primary" type="submit">Verify and Create Account</button>
-      </form>
-
-      <form id="loginForm" class="auth-form">
-        <label>Email <input type="email" name="email" required placeholder="you@email.com" /></label>
-        <label>Password <input type="password" name="password" required placeholder="Your password" /></label>
-        <button class="btn btn-primary" type="submit">Login</button>
-      </form>
-
-      <div class="divider"><span>or</span></div>
-      <div id="googleBtn" class="google-button-wrap"></div>
-      <button id="googleFallbackBtn" class="btn btn-google" type="button">Continue with Google</button>
       <p id="authMessage" class="note" aria-live="polite"></p>
 
       <div id="sessionPanel" class="session" hidden>
@@ -68,8 +71,15 @@
           <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
         </div>
 
-        <section class="profile-box">
-          <h3>Profile Settings</h3>
+        <div class="account-tabs" role="tablist" aria-label="Account sections">
+          <button class="account-tab active" data-panel="profile" type="button">Profile</button>
+          <button class="account-tab" data-panel="settings" type="button">Settings</button>
+          <button class="account-tab" data-panel="network" type="button">Friends</button>
+          <button class="account-tab" data-panel="activity" type="button">Threads</button>
+        </div>
+
+        <section class="profile-box account-panel active" data-panel="profile">
+          <h3>Profile</h3>
           <form id="profileForm" class="settings-form">
             <label>Display name <input id="profileName" name="display_name" required maxlength="40" /></label>
             <label>Email <input id="profileEmail" type="email" disabled /></label>
@@ -77,8 +87,8 @@
           </form>
         </section>
 
-        <section class="profile-box">
-          <h3>Security</h3>
+        <section class="profile-box account-panel" data-panel="settings">
+          <h3>Security Settings</h3>
           <form id="passwordForm" class="settings-form">
             <label>New password <input id="newPassword" type="password" minlength="6" required placeholder="At least 6 characters" /></label>
             <label>Confirm password <input id="confirmPassword" type="password" minlength="6" required placeholder="Repeat new password" /></label>
@@ -86,6 +96,40 @@
           </form>
           <div class="settings-form">
             <button id="linkGoogleBtn" class="btn btn-ghost" type="button">Link Google Account</button>
+          </div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="network">
+          <h3>Friends & Followers</h3>
+          <p id="networkStats" class="note"></p>
+          <form id="followForm" class="settings-form">
+            <label>Find user by email <input id="followEmail" type="email" placeholder="friend@email.com" /></label>
+            <button class="btn btn-primary" type="submit">Follow User</button>
+          </form>
+          <div class="list-grid">
+            <div>
+              <h4>Following</h4>
+              <div id="followingList" class="mini-list"></div>
+            </div>
+            <div>
+              <h4>Followers</h4>
+              <div id="followersList" class="mini-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="activity">
+          <h3>My Activity</h3>
+          <p id="activityStats" class="note"></p>
+          <div class="list-grid">
+            <div>
+              <h4>My Threads</h4>
+              <div id="myThreads" class="mini-list"></div>
+            </div>
+            <div>
+              <h4>Liked Threads</h4>
+              <div id="likedThreads" class="mini-list"></div>
+            </div>
           </div>
         </section>
       </div>

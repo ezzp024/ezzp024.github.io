@@ -7,6 +7,7 @@ This path keeps your site free and avoids paid backend hosting.
 1. Go to https://supabase.com/dashboard
 2. Create a new project
 3. Open **SQL Editor** and run `SUPABASE_SETUP.sql`
+   - If you already ran an older version, run the latest file again to add new social tables/policies.
 
 ## 2) Configure auth providers
 

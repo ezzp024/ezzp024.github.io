@@ -1,16 +1,16 @@
 const sb = window.sb;
 
+const guestAuthSection = document.querySelector('#guestAuthSection');
 const registerForm = document.querySelector('#registerForm');
 const loginForm = document.querySelector('#loginForm');
 const sendCodeBtn = document.querySelector('#sendCodeBtn');
 const googleBtn = document.querySelector('#googleBtn');
 const googleFallbackBtn = document.querySelector('#googleFallbackBtn');
-const authTabsWrap = document.querySelector('.sort-tabs');
-const divider = document.querySelector('.divider');
 const authMessage = document.querySelector('#authMessage');
 const sessionPanel = document.querySelector('#sessionPanel');
 const sessionText = document.querySelector('#sessionText');
 const logoutBtn = document.querySelector('#logoutBtn');
+
 const profileForm = document.querySelector('#profileForm');
 const profileName = document.querySelector('#profileName');
 const profileEmail = document.querySelector('#profileEmail');
@@ -18,8 +18,20 @@ const passwordForm = document.querySelector('#passwordForm');
 const newPassword = document.querySelector('#newPassword');
 const confirmPassword = document.querySelector('#confirmPassword');
 const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
+
+const followForm = document.querySelector('#followForm');
+const followEmail = document.querySelector('#followEmail');
+const networkStats = document.querySelector('#networkStats');
+const followingList = document.querySelector('#followingList');
+const followersList = document.querySelector('#followersList');
+const activityStats = document.querySelector('#activityStats');
+const myThreads = document.querySelector('#myThreads');
+const likedThreads = document.querySelector('#likedThreads');
+
 const authTabs = document.querySelectorAll('.auth-tab');
-const forms = document.querySelectorAll('.auth-form');
+const authForms = document.querySelectorAll('.auth-form');
+const accountTabs = document.querySelectorAll('.account-tab');
+const accountPanels = document.querySelectorAll('.account-panel');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
 
@@ -27,47 +39,16 @@ const setMessage = (message, isError = false) => {
   if (!authMessage) {
     return;
   }
-
   authMessage.textContent = message;
   authMessage.style.color = isError ? '#ffb7b7' : '#90ffd2';
 };
 
-const setFormActive = (tabName) => {
-  authTabs.forEach((item) => {
-    const active = item.dataset.authTab === tabName;
-    item.classList.toggle('active', active);
-    item.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-
-  forms.forEach((form) => {
-    form.classList.toggle('active', form.id === `${tabName}Form`);
-  });
-};
-
-const setAuthUiForSession = (loggedIn) => {
-  if (authTabsWrap) {
-    authTabsWrap.hidden = loggedIn;
+const guardSupabase = () => {
+  if (!sb) {
+    setMessage(window.__supabaseInitError || 'Supabase not configured.', true);
+    return false;
   }
-
-  if (divider) {
-    divider.hidden = loggedIn;
-  }
-
-  if (registerForm) {
-    registerForm.hidden = loggedIn;
-  }
-
-  if (loginForm) {
-    loginForm.hidden = loggedIn;
-  }
-
-  if (googleBtn) {
-    googleBtn.hidden = loggedIn;
-  }
-
-  if (googleFallbackBtn) {
-    googleFallbackBtn.hidden = loggedIn;
-  }
+  return true;
 };
 
 const getDraft = () => {
@@ -87,26 +68,47 @@ const clearDraft = () => {
   localStorage.removeItem(REG_DRAFT_KEY);
 };
 
-const guardSupabase = () => {
-  if (!sb) {
-    setMessage(window.__supabaseInitError || 'Supabase not configured.', true);
-    return false;
+const setAuthForm = (tabName) => {
+  authTabs.forEach((item) => {
+    const active = item.dataset.authTab === tabName;
+    item.classList.toggle('active', active);
+    item.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+
+  authForms.forEach((form) => {
+    form.classList.toggle('active', form.id === `${tabName}Form`);
+  });
+};
+
+const setAccountPanel = (panelName) => {
+  accountTabs.forEach((item) => {
+    item.classList.toggle('active', item.dataset.panel === panelName);
+  });
+  accountPanels.forEach((panel) => {
+    panel.classList.toggle('active', panel.dataset.panel === panelName);
+  });
+};
+
+const setUiForLoggedState = (loggedIn) => {
+  if (guestAuthSection) {
+    guestAuthSection.hidden = loggedIn;
   }
-  return true;
+  if (sessionPanel) {
+    sessionPanel.hidden = !loggedIn;
+  }
+  if (!loggedIn) {
+    setAuthForm('register');
+  }
 };
 
 const ensureProfile = async (user, fallbackName = '') => {
   const email = String(user.email || '').toLowerCase();
   const displayName =
     String(user.user_metadata?.display_name || '').trim() || fallbackName || email.split('@')[0] || 'Member';
-  const { error } = await sb.from('profiles').upsert(
-    {
-      id: user.id,
-      email,
-      display_name: displayName
-    },
-    { onConflict: 'id' }
-  );
+
+  const { error } = await sb
+    .from('profiles')
+    .upsert({ id: user.id, email, display_name: displayName }, { onConflict: 'id' });
 
   if (error) {
     throw error;
@@ -126,9 +128,111 @@ const getProfile = async (userId) => {
   return data;
 };
 
+const loadNetwork = async (userId) => {
+  if (!networkStats) {
+    return;
+  }
+
+  const { data: followingRows, error: followingError } = await sb
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId);
+
+  if (followingError) {
+    networkStats.textContent = 'Network tables not ready yet. Run SUPABASE_SETUP.sql again.';
+    return;
+  }
+
+  const { data: followerRows } = await sb.from('follows').select('follower_id').eq('following_id', userId);
+
+  const followingIds = (followingRows || []).map((item) => item.following_id);
+  const followerIds = (followerRows || []).map((item) => item.follower_id);
+
+  const [followingProfiles, followerProfiles] = await Promise.all([
+    followingIds.length
+      ? sb.from('profiles').select('id,display_name,email').in('id', followingIds)
+      : Promise.resolve({ data: [] }),
+    followerIds.length
+      ? sb.from('profiles').select('id,display_name,email').in('id', followerIds)
+      : Promise.resolve({ data: [] })
+  ]);
+
+  const followingData = followingProfiles.data || [];
+  const followerData = followerProfiles.data || [];
+  const followerSet = new Set(followerData.map((item) => item.id));
+  const friendsCount = followingData.filter((item) => followerSet.has(item.id)).length;
+
+  networkStats.textContent = `${followingData.length} following | ${followerData.length} followers | ${friendsCount} friends`;
+
+  if (followingList) {
+    followingList.innerHTML =
+      followingData.length === 0
+        ? '<p class="note">No following yet.</p>'
+        : followingData
+            .map(
+              (person) =>
+                `<div class="mini-item"><span>${person.display_name} (${person.email})</span><button class="control-btn" data-unfollow-id="${person.id}" type="button">Unfollow</button></div>`
+            )
+            .join('');
+  }
+
+  if (followersList) {
+    followersList.innerHTML =
+      followerData.length === 0
+        ? '<p class="note">No followers yet.</p>'
+        : followerData
+            .map((person) => `<div class="mini-item"><span>${person.display_name} (${person.email})</span></div>`)
+            .join('');
+  }
+};
+
+const loadActivity = async (userId) => {
+  if (!activityStats) {
+    return;
+  }
+
+  const { data: threadRows } = await sb
+    .from('threads')
+    .select('id,title,created_at')
+    .eq('author_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const { data: upvoteRows } = await sb.from('thread_upvotes').select('thread_id').eq('user_id', userId).limit(10);
+  const likedIds = (upvoteRows || []).map((item) => item.thread_id);
+
+  const likedRows = likedIds.length
+    ? (
+        await sb
+          .from('threads')
+          .select('id,title,created_at')
+          .in('id', likedIds)
+          .order('created_at', { ascending: false })
+      ).data || []
+    : [];
+
+  activityStats.textContent = `${threadRows?.length || 0} threads created | ${likedRows.length} threads liked`;
+
+  if (myThreads) {
+    myThreads.innerHTML =
+      !threadRows || threadRows.length === 0
+        ? '<p class="note">No threads posted yet.</p>'
+        : threadRows
+            .map((thread) => `<a class="mini-item" href="forum.html">${thread.title}</a>`)
+            .join('');
+  }
+
+  if (likedThreads) {
+    likedThreads.innerHTML =
+      likedRows.length === 0
+        ? '<p class="note">No liked threads yet.</p>'
+        : likedRows.map((thread) => `<a class="mini-item" href="forum.html">${thread.title}</a>`).join('');
+  }
+};
+
 const renderSession = async () => {
   if (!guardSupabase()) {
-    sessionPanel.hidden = true;
+    setUiForLoggedState(false);
     return;
   }
 
@@ -137,35 +241,46 @@ const renderSession = async () => {
   } = await sb.auth.getSession();
 
   if (!session?.user) {
-    setAuthUiForSession(false);
-    sessionPanel.hidden = true;
-    sessionText.textContent = '';
+    setUiForLoggedState(false);
+    if (sessionText) {
+      sessionText.textContent = '';
+    }
     return;
   }
 
   try {
     await ensureProfile(session.user);
     const profile = await getProfile(session.user.id);
-    setAuthUiForSession(true);
-    sessionPanel.hidden = false;
-    sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;
+    setUiForLoggedState(true);
+    setAccountPanel('profile');
+
+    if (sessionText) {
+      sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;
+    }
     if (profileName) {
       profileName.value = profile.display_name || '';
     }
     if (profileEmail) {
       profileEmail.value = profile.email || '';
     }
+
+    await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
   } catch (error) {
-    setAuthUiForSession(false);
-    sessionPanel.hidden = true;
-    sessionText.textContent = '';
-    setMessage(error.message || 'Could not load profile.', true);
+    setUiForLoggedState(false);
+    setMessage(error.message || 'Could not load account session.', true);
   }
 };
 
 authTabs.forEach((tab) => {
   tab.addEventListener('click', () => {
-    setFormActive(tab.dataset.authTab);
+    setAuthForm(tab.dataset.authTab || 'register');
+    setMessage('');
+  });
+});
+
+accountTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    setAccountPanel(tab.dataset.panel || 'profile');
     setMessage('');
   });
 });
@@ -188,10 +303,7 @@ if (sendCodeBtn && registerForm) {
 
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: {
-        shouldCreateUser: true,
-        data: { display_name: name }
-      }
+      options: { shouldCreateUser: true, data: { display_name: name } }
     });
 
     if (error) {
@@ -221,12 +333,7 @@ if (registerForm) {
       return;
     }
 
-    const { data: verifyData, error } = await sb.auth.verifyOtp({
-      email,
-      token: code,
-      type: 'email'
-    });
-
+    const { data: verifyData, error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
     if (error || !verifyData?.user) {
       setMessage(error?.message || 'Verification failed.', true);
       return;
@@ -240,20 +347,11 @@ if (registerForm) {
       }
     }
 
-    try {
-      await ensureProfile(verifyData.user, draft?.name || 'Member');
-      const profile = await getProfile(verifyData.user.id);
-      if (profile.approved) {
-        setMessage('Account verified and ready. You can use the forum now.');
-      } else {
-        setMessage('Email verified. Waiting for admin approval.');
-      }
-      clearDraft();
-      registerForm.reset();
-      await renderSession();
-    } catch (profileError) {
-      setMessage(profileError.message || 'Could not finish registration.', true);
-    }
+    await ensureProfile(verifyData.user, draft?.name || 'Member');
+    clearDraft();
+    registerForm.reset();
+    setMessage('Email verified. If not admin, wait for approval.');
+    await renderSession();
   });
 }
 
@@ -267,7 +365,6 @@ if (loginForm) {
     const data = new FormData(loginForm);
     const email = String(data.get('email') || '').trim().toLowerCase();
     const password = String(data.get('password') || '');
-
     if (!email || !password) {
       setMessage('Please fill login fields.', true);
       return;
@@ -279,19 +376,9 @@ if (loginForm) {
       return;
     }
 
-    try {
-      await ensureProfile(loginData.user);
-      const profile = await getProfile(loginData.user.id);
-      if (!profile.approved) {
-        setMessage('Login successful, but your account is pending admin approval.', true);
-      } else {
-        setMessage(`Welcome back ${profile.display_name}.`);
-      }
-      loginForm.reset();
-      await renderSession();
-    } catch (profileError) {
-      setMessage(profileError.message || 'Could not load your profile.', true);
-    }
+    setMessage('Login successful.');
+    loginForm.reset();
+    await renderSession();
   });
 }
 
@@ -309,26 +396,12 @@ if (googleBtn) {
 
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/account.html`
-      }
+      options: { redirectTo: `${window.location.origin}/account.html` }
     });
 
     if (error) {
       setMessage(error.message, true);
     }
-  });
-}
-
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-
-    await sb.auth.signOut();
-    await renderSession();
-    setMessage('Logged out.');
   });
 }
 
@@ -342,7 +415,6 @@ if (profileForm) {
     const {
       data: { session }
     } = await sb.auth.getSession();
-
     if (!session?.user) {
       setMessage('Please login first.', true);
       return;
@@ -354,11 +426,7 @@ if (profileForm) {
       return;
     }
 
-    const { error } = await sb
-      .from('profiles')
-      .update({ display_name: name })
-      .eq('id', session.user.id);
-
+    const { error } = await sb.from('profiles').update({ display_name: name }).eq('id', session.user.id);
     if (error) {
       setMessage(error.message, true);
       return;
@@ -378,12 +446,10 @@ if (passwordForm) {
 
     const password = String(newPassword?.value || '');
     const confirm = String(confirmPassword?.value || '');
-
     if (password.length < 6) {
       setMessage('Password must be at least 6 characters.', true);
       return;
     }
-
     if (password !== confirm) {
       setMessage('Passwords do not match.', true);
       return;
@@ -407,20 +473,119 @@ if (linkGoogleBtn) {
     }
 
     if (typeof sb.auth.linkIdentity !== 'function') {
-      setMessage('Google account linking is not supported in this browser session.', true);
+      setMessage('Google linking not available in this session.', true);
       return;
     }
 
     const { error } = await sb.auth.linkIdentity({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/account.html`
-      }
+      options: { redirectTo: `${window.location.origin}/account.html` }
     });
 
     if (error) {
       setMessage(error.message, true);
     }
+  });
+}
+
+if (followForm) {
+  followForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const email = String(followEmail?.value || '').trim().toLowerCase();
+    if (!email) {
+      setMessage('Enter an email to follow.', true);
+      return;
+    }
+
+    if (email === String(session.user.email || '').toLowerCase()) {
+      setMessage('You cannot follow yourself.', true);
+      return;
+    }
+
+    const { data: target, error: targetError } = await sb
+      .from('profiles')
+      .select('id,display_name')
+      .eq('email', email)
+      .single();
+
+    if (targetError || !target) {
+      setMessage('User not found.', true);
+      return;
+    }
+
+    const { error } = await sb.from('follows').insert({
+      follower_id: session.user.id,
+      following_id: target.id
+    });
+
+    if (error) {
+      setMessage(error.message.includes('duplicate') ? 'You already follow this user.' : error.message, true);
+      return;
+    }
+
+    followForm.reset();
+    setMessage(`You are now following ${target.display_name}.`);
+    await loadNetwork(session.user.id);
+  });
+}
+
+if (followingList) {
+  followingList.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-unfollow-id]');
+    if (!button || !guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const targetId = button.getAttribute('data-unfollow-id');
+    if (!targetId) {
+      return;
+    }
+
+    const { error } = await sb
+      .from('follows')
+      .delete()
+      .eq('follower_id', session.user.id)
+      .eq('following_id', targetId);
+
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    setMessage('User unfollowed.');
+    await loadNetwork(session.user.id);
+  });
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+
+    await sb.auth.signOut();
+    setMessage('Logged out.');
+    await renderSession();
   });
 }
 

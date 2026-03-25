@@ -36,6 +36,14 @@ create table if not exists public.thread_upvotes (
   primary key (thread_id, user_id)
 );
 
+create table if not exists public.follows (
+  follower_id uuid not null references public.profiles(id) on delete cascade,
+  following_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (follower_id, following_id),
+  check (follower_id <> following_id)
+);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -70,6 +78,7 @@ alter table public.profiles enable row level security;
 alter table public.threads enable row level security;
 alter table public.replies enable row level security;
 alter table public.thread_upvotes enable row level security;
+alter table public.follows enable row level security;
 
 drop policy if exists "profiles read all auth" on public.profiles;
 create policy "profiles read all auth"
@@ -163,6 +172,33 @@ with check (
     where p.id = auth.uid() and p.approved = true
   )
 );
+
+drop policy if exists "follows read all" on public.follows;
+create policy "follows read all"
+on public.follows
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "follows insert self" on public.follows;
+create policy "follows insert self"
+on public.follows
+for insert
+to authenticated
+with check (
+  follower_id = auth.uid()
+  and exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.approved = true
+  )
+);
+
+drop policy if exists "follows delete self" on public.follows;
+create policy "follows delete self"
+on public.follows
+for delete
+to authenticated
+using (follower_id = auth.uid());
 
 -- Run this once to promote your admin account after signup:
 -- update public.profiles
