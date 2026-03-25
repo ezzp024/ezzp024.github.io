@@ -92,12 +92,23 @@ const setAuthForm = (tabName) => {
 };
 
 const setAccountPanel = (panelName) => {
+  const target = panelName || 'profile';
   accountTabs.forEach((item) => {
-    item.classList.toggle('active', item.dataset.panel === panelName);
+    item.classList.toggle('active', item.dataset.panel === target);
   });
   accountPanels.forEach((panel) => {
-    panel.classList.toggle('active', panel.dataset.panel === panelName);
+    panel.classList.toggle('active', panel.dataset.panel === target);
   });
+
+  if (window.location.hash !== `#${target}`) {
+    window.history.replaceState({}, '', `#${target}`);
+  }
+};
+
+const getPanelFromHash = () => {
+  const value = window.location.hash.replace('#', '').trim();
+  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity']);
+  return valid.has(value) ? value : 'profile';
 };
 
 const setUiForLoggedState = (loggedIn) => {
@@ -309,7 +320,7 @@ const renderSession = async () => {
   try {
     await ensureProfile(session.user);
     const profile = await getProfile(session.user.id);
-    setAccountPanel('profile');
+    setAccountPanel(getPanelFromHash());
 
     if (sessionText) {
       sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;

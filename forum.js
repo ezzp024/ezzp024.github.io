@@ -137,6 +137,7 @@ const renderThreads = async () => {
     return;
   }
 
+  threadFeed.innerHTML = '<p class="note">Loading feed...</p>';
   allThreads = await getThreads();
   const keyword = String(feedSearch?.value || '').trim().toLowerCase();
   const threads = allThreads.filter((thread) => {

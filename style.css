@@ -151,6 +151,66 @@ main,
   gap: 1rem;
 }
 
+.topbar-user {
+  margin-left: auto;
+  position: relative;
+}
+
+.user-link {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(8, 24, 42, 0.7);
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.38rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 170px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(7, 20, 35, 0.95);
+  box-shadow: var(--shadow);
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.25rem;
+  z-index: 50;
+}
+
+.user-menu a,
+.user-menu button {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #cbe7fa;
+  text-decoration: none;
+  padding: 0.42rem 0.55rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.user-menu a:hover,
+.user-menu button:hover {
+  border-color: rgba(131, 255, 216, 0.4);
+  color: var(--mint);
+  background: rgba(8, 26, 46, 0.6);
+}
+
+.tiny-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 0.78rem;
+}
+
 .topnav a {
   color: var(--text);
   text-decoration: none;
@@ -854,11 +914,24 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .footer a {
   text-decoration: none;
   color: var(--mint);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.panel-page {
+  margin-top: 2rem;
+  padding: 1rem;
 }
 
 .reveal {
@@ -906,6 +979,10 @@ textarea {
     pointer-events: none;
     transform: translateY(-8px);
     transition: 0.2s ease;
+  }
+
+  .topbar-user {
+    margin-left: 0;
   }
 
   .topnav.open {
