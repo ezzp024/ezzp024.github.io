@@ -724,6 +724,24 @@ textarea {
   gap: 0.65rem;
 }
 
+.billing-grid {
+  margin-top: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+.billing-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(8, 22, 39, 0.67);
+}
+
+.billing-card h4 {
+  margin-top: 0.3rem;
+}
+
 .list-grid h4 {
   margin: 0;
 }
@@ -903,6 +921,10 @@ textarea {
   }
 
   .list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-grid {
     grid-template-columns: 1fr;
   }
 

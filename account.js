@@ -1,6 +1,8 @@
 const sb = window.sb;
 
 const guestAuthSection = document.querySelector('#guestAuthSection');
+const accountHeading = document.querySelector('#accountHeading');
+const accountSub = document.querySelector('#accountSub');
 const registerForm = document.querySelector('#registerForm');
 const loginForm = document.querySelector('#loginForm');
 const sendCodeBtn = document.querySelector('#sendCodeBtn');
@@ -18,6 +20,8 @@ const passwordForm = document.querySelector('#passwordForm');
 const newPassword = document.querySelector('#newPassword');
 const confirmPassword = document.querySelector('#confirmPassword');
 const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
+const linkGithubBtn = document.querySelector('#linkGithubBtn');
+const linkDiscordBtn = document.querySelector('#linkDiscordBtn');
 
 const followForm = document.querySelector('#followForm');
 const followEmail = document.querySelector('#followEmail');
@@ -27,6 +31,12 @@ const followersList = document.querySelector('#followersList');
 const activityStats = document.querySelector('#activityStats');
 const myThreads = document.querySelector('#myThreads');
 const likedThreads = document.querySelector('#likedThreads');
+const manageBillingBtn = document.querySelector('#manageBillingBtn');
+const billingForm = document.querySelector('#billingForm');
+const cardLast4 = document.querySelector('#cardLast4');
+const cardMask = document.querySelector('#cardMask');
+const planName = document.querySelector('#planName');
+const planStatus = document.querySelector('#planStatus');
 
 const authTabs = document.querySelectorAll('.auth-tab');
 const authForms = document.querySelectorAll('.auth-form');
@@ -34,6 +44,7 @@ const accountTabs = document.querySelectorAll('.account-tab');
 const accountPanels = document.querySelectorAll('.account-panel');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
+const BILLING_KEY = 'polly_billing_map';
 
 const setMessage = (message, isError = false) => {
   if (!authMessage) {
@@ -98,6 +109,50 @@ const setUiForLoggedState = (loggedIn) => {
   }
   if (!loggedIn) {
     setAuthForm('register');
+    if (accountHeading) {
+      accountHeading.textContent = 'Register or Login';
+    }
+    if (accountSub) {
+      accountSub.textContent = 'Secure sign-in, email verification, and approval workflow for trusted members.';
+    }
+  } else {
+    if (accountHeading) {
+      accountHeading.textContent = 'My Account';
+    }
+    if (accountSub) {
+      accountSub.textContent = 'Manage your profile, settings, payment, social graph, and activity.';
+    }
+  }
+};
+
+const readBillingMap = () => {
+  try {
+    const raw = localStorage.getItem(BILLING_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeBillingMap = (value) => {
+  localStorage.setItem(BILLING_KEY, JSON.stringify(value));
+};
+
+const renderBilling = (userId) => {
+  const map = readBillingMap();
+  const data = map[userId] || { plan: 'Starter', status: 'Free community access', last4: '' };
+
+  if (planName) {
+    planName.textContent = data.plan;
+  }
+  if (planStatus) {
+    planStatus.textContent = data.status;
+  }
+  if (cardMask) {
+    cardMask.textContent = data.last4 ? `Visa •••• ${data.last4}` : 'No card saved';
+  }
+  if (cardLast4) {
+    cardLast4.value = data.last4 || '';
   }
 };
 
@@ -267,6 +322,7 @@ const renderSession = async () => {
     }
 
     await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
+    renderBilling(session.user.id);
   } catch (error) {
     // Keep account view visible even if profile/network queries fail.
     if (sessionText) {
@@ -496,6 +552,57 @@ if (linkGoogleBtn) {
     if (error) {
       setMessage(error.message, true);
     }
+  });
+}
+
+if (linkGithubBtn) {
+  linkGithubBtn.addEventListener('click', () => {
+    setMessage('GitHub linking will be enabled in the next update.');
+  });
+}
+
+if (linkDiscordBtn) {
+  linkDiscordBtn.addEventListener('click', () => {
+    setMessage('Discord linking will be enabled in the next update.');
+  });
+}
+
+if (billingForm) {
+  billingForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const last4 = String(cardLast4?.value || '').trim();
+    if (!/^\d{4}$/.test(last4)) {
+      setMessage('Enter exactly 4 digits for card last 4.', true);
+      return;
+    }
+
+    const map = readBillingMap();
+    map[session.user.id] = {
+      plan: 'Starter',
+      status: 'Free community access',
+      last4
+    };
+    writeBillingMap(map);
+    renderBilling(session.user.id);
+    setMessage('Payment method saved.');
+  });
+}
+
+if (manageBillingBtn) {
+  manageBillingBtn.addEventListener('click', () => {
+    setMessage('Billing portal integration can be added next (Stripe).');
   });
 }
 

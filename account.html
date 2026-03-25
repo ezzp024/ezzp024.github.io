@@ -34,8 +34,8 @@
   <main class="account-main account-grid">
     <section class="account-wrap card reveal">
       <p class="tag">Profile Access</p>
-      <h1>Register or Login</h1>
-      <p class="account-sub">Secure sign-in, email verification, and approval workflow for trusted members.</p>
+      <h1 id="accountHeading">Register or Login</h1>
+      <p id="accountSub" class="account-sub">Secure sign-in, email verification, and approval workflow for trusted members.</p>
       <div id="guestAuthSection" hidden>
         <div class="sort-tabs" role="tablist" aria-label="Account tabs">
           <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
@@ -74,6 +74,7 @@
         <div class="account-tabs" role="tablist" aria-label="Account sections">
           <button class="account-tab active" data-panel="profile" type="button">Profile</button>
           <button class="account-tab" data-panel="settings" type="button">Settings</button>
+          <button class="account-tab" data-panel="billing" type="button">Payment</button>
           <button class="account-tab" data-panel="network" type="button">Friends</button>
           <button class="account-tab" data-panel="activity" type="button">Threads</button>
         </div>
@@ -96,6 +97,28 @@
           </form>
           <div class="settings-form">
             <button id="linkGoogleBtn" class="btn btn-ghost" type="button">Link Google Account</button>
+            <button id="linkGithubBtn" class="btn btn-ghost" type="button">Link GitHub (Soon)</button>
+            <button id="linkDiscordBtn" class="btn btn-ghost" type="button">Link Discord (Soon)</button>
+          </div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="billing">
+          <h3>Payment & Billing</h3>
+          <div class="billing-grid">
+            <article class="billing-card">
+              <p class="note">Current Plan</p>
+              <h4 id="planName">Starter</h4>
+              <p id="planStatus" class="note">Free community access</p>
+              <button id="manageBillingBtn" class="btn btn-ghost" type="button">Manage Billing</button>
+            </article>
+            <article class="billing-card">
+              <p class="note">Saved Method</p>
+              <h4 id="cardMask">No card saved</h4>
+              <form id="billingForm" class="settings-form">
+                <label>Card last 4 digits <input id="cardLast4" maxlength="4" inputmode="numeric" placeholder="1234" /></label>
+                <button class="btn btn-primary" type="submit">Save Payment Method</button>
+              </form>
+            </article>
           </div>
         </section>
 
