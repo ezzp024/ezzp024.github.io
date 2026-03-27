@@ -80,6 +80,13 @@ const clearDraft = () => {
   localStorage.removeItem(REG_DRAFT_KEY);
 };
 
+const getAccountRedirectUrl = () => {
+  const url = new URL('account.html', window.location.href);
+  url.search = '';
+  url.hash = '';
+  return url.toString();
+};
+
 const setAuthForm = (tabName) => {
   authTabs.forEach((item) => {
     const active = item.dataset.authTab === tabName;
@@ -432,7 +439,27 @@ if (loginForm) {
 }
 
 if (googleFallbackBtn) {
-  googleFallbackBtn.style.display = 'none';
+  googleFallbackBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) return;
+
+    try {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: getAccountRedirectUrl() }
+      });
+
+      if (error) {
+        setMessage(error.message, true);
+        return;
+      }
+
+      if (data?.url) {
+        window.location.assign(data.url);
+      }
+    } catch (error) {
+      setMessage(error?.message || 'Google login failed to start.', true);
+    }
+  });
 }
 
 if (googleBtn) {
@@ -441,13 +468,22 @@ if (googleBtn) {
   button?.addEventListener('click', async () => {
     if (!guardSupabase()) return;
 
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/account.html` }
-    });
+    try {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: getAccountRedirectUrl() }
+      });
 
-    if (error) {
-      setMessage(error.message, true);
+      if (error) {
+        setMessage(error.message, true);
+        return;
+      }
+
+      if (data?.url) {
+        window.location.assign(data.url);
+      }
+    } catch (error) {
+      setMessage(error?.message || 'Google login failed to start.', true);
     }
   });
 }
@@ -560,7 +596,7 @@ if (linkGoogleBtn) {
 
     const { error } = await sb.auth.linkIdentity({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/account.html` }
+      options: { redirectTo: getAccountRedirectUrl() }
     });
 
     if (error) {
