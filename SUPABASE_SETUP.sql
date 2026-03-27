@@ -57,6 +57,30 @@ create table if not exists public.notifications (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.direct_messages (
+  id bigint generated always as identity primary key,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  sender_name text not null,
+  recipient_name text not null,
+  body text not null,
+  is_read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.reports (
+  id bigint generated always as identity primary key,
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  kind text not null,
+  target_type text not null,
+  target_id bigint not null,
+  reason text not null,
+  status text not null default 'open',
+  resolved_by uuid references public.profiles(id) on delete set null,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -93,6 +117,8 @@ alter table public.replies enable row level security;
 alter table public.thread_upvotes enable row level security;
 alter table public.follows enable row level security;
 alter table public.notifications enable row level security;
+alter table public.direct_messages enable row level security;
+alter table public.reports enable row level security;
 
 drop policy if exists "profiles read all auth" on public.profiles;
 create policy "profiles read all auth"
@@ -244,6 +270,73 @@ to authenticated
 with check (
   actor_id = auth.uid()
   and recipient_id is not null
+);
+
+drop policy if exists "messages read own" on public.direct_messages;
+create policy "messages read own"
+on public.direct_messages
+for select
+to authenticated
+using (sender_id = auth.uid() or recipient_id = auth.uid());
+
+drop policy if exists "messages send approved" on public.direct_messages;
+create policy "messages send approved"
+on public.direct_messages
+for insert
+to authenticated
+with check (
+  sender_id = auth.uid()
+  and sender_id <> recipient_id
+  and exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.approved = true
+  )
+);
+
+drop policy if exists "messages mark_read_recipient" on public.direct_messages;
+create policy "messages mark_read_recipient"
+on public.direct_messages
+for update
+to authenticated
+using (recipient_id = auth.uid())
+with check (recipient_id = auth.uid());
+
+drop policy if exists "reports read_own_or_admin" on public.reports;
+create policy "reports read_own_or_admin"
+on public.reports
+for select
+to authenticated
+using (
+  reporter_id = auth.uid()
+  or exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid() and me.is_admin = true
+  )
+);
+
+drop policy if exists "reports insert_self" on public.reports;
+create policy "reports insert_self"
+on public.reports
+for insert
+to authenticated
+with check (reporter_id = auth.uid());
+
+drop policy if exists "reports admin_update" on public.reports;
+create policy "reports admin_update"
+on public.reports
+for update
+to authenticated
+using (
+  exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid() and me.is_admin = true
+  )
+)
+with check (
+  exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid() and me.is_admin = true
+  )
 );
 
 insert into storage.buckets (id, name, public)

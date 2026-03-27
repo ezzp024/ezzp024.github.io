@@ -110,7 +110,7 @@ const getThreads = async () => {
 
   const authorIds = [...new Set([...threadRows.map((item) => item.author_id), ...replyRows.map((item) => item.author_id)])];
   const { data: authorProfiles } = authorIds.length
-    ? await sb.from('profiles').select('id,display_name,avatar_url').in('id', authorIds)
+    ? await sb.from('profiles').select('id,display_name,avatar_url,email').in('id', authorIds)
     : { data: [] };
 
   const profileById = new Map((authorProfiles || []).map((profile) => [profile.id, profile]));
@@ -145,6 +145,7 @@ const getThreads = async () => {
       ...thread,
       replies,
       author_avatar_url: authorProfile?.avatar_url || '',
+      author_email: authorProfile?.email || '',
       upvote_count: upvoters.length,
       user_upvoted: currentUser ? upvoters.includes(currentUser.id) : false
     };
@@ -226,6 +227,8 @@ const renderThreads = async () => {
       <div class="thread-controls">
         <button class="control-btn" data-action="upvote" data-thread-id="${thread.id}">${thread.user_upvoted ? 'Upvoted' : 'Upvote'} (${thread.upvote_count})</button>
         <button class="control-btn" data-action="collapse" data-thread-id="${thread.id}">Collapse</button>
+        <a class="control-btn" href="account.html?to=${encodeURIComponent(thread.author_email || '')}#messages">Message</a>
+        <button class="control-btn" data-action="report" data-thread-id="${thread.id}">Report</button>
       </div>
       <section class="replies" data-replies-id="${thread.id}">
         ${repliesHTML || '<p class="note">No replies yet.</p>'}
@@ -384,6 +387,34 @@ if (threadFeed) {
 
       const collapsed = replies.classList.toggle('collapsed');
       button.textContent = collapsed ? 'Expand' : 'Collapse';
+      return;
+    }
+
+    if (action === 'report') {
+      if (!guardSupabase() || !requireApprovedUser()) {
+        return;
+      }
+
+      const reason = window.prompt('Report reason (spam, abuse, harassment, off-topic):', 'spam');
+      if (!reason) {
+        return;
+      }
+
+      const { error } = await sb.from('reports').insert({
+        reporter_id: currentUser.id,
+        kind: reason.trim().toLowerCase(),
+        target_type: 'thread',
+        target_id: threadId,
+        reason: reason.trim(),
+        status: 'open'
+      });
+
+      if (error) {
+        setThreadMessage(error.message, true);
+        return;
+      }
+
+      setThreadMessage('Report submitted to moderation queue.');
     }
   });
 

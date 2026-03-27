@@ -78,6 +78,8 @@
           <button class="account-tab" data-panel="network" type="button">Friends</button>
           <button class="account-tab" data-panel="activity" type="button">Threads</button>
           <button class="account-tab" data-panel="notifications" type="button">Notifications</button>
+          <button class="account-tab" data-panel="messages" type="button">Messages</button>
+          <button class="account-tab" data-panel="moderation" type="button">Moderation</button>
         </div>
 
         <section class="profile-box account-panel active" data-panel="profile">
@@ -186,6 +188,33 @@
             <button id="markReadBtn" class="btn btn-ghost" type="button">Mark all read</button>
           </div>
           <div id="notificationsList" class="mini-list"></div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="messages">
+          <h3>Direct Messages</h3>
+          <form id="messageForm" class="settings-form">
+            <label>Recipient email <input id="messageRecipient" type="email" placeholder="friend@email.com" required /></label>
+            <label>Message <textarea id="messageBody" rows="3" maxlength="600" placeholder="Write your message" required></textarea></label>
+            <button class="btn btn-primary" type="submit">Send Message</button>
+          </form>
+          <div class="session-actions">
+            <button id="refreshMessagesBtn" class="btn btn-ghost" type="button">Refresh</button>
+            <button id="markMessagesReadBtn" class="btn btn-ghost" type="button">Mark all received as read</button>
+          </div>
+          <div id="messagesList" class="mini-list"></div>
+        </section>
+
+        <section class="profile-box account-panel" data-panel="moderation">
+          <h3>Moderation & Reports</h3>
+          <p id="moderationInfo" class="note">Track your reports and admin moderation actions.</p>
+          <div class="session-actions">
+            <button id="refreshReportsBtn" class="btn btn-ghost" type="button">Refresh Reports</button>
+          </div>
+          <div id="myReports" class="mini-list"></div>
+          <div id="adminReportsWrap" hidden>
+            <h4>Admin Queue</h4>
+            <div id="adminReports" class="mini-list"></div>
+          </div>
         </section>
       </div>
     </section>

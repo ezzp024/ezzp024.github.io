@@ -42,6 +42,17 @@ const likedThreads = document.querySelector('#likedThreads');
 const notificationsList = document.querySelector('#notificationsList');
 const refreshNotificationsBtn = document.querySelector('#refreshNotificationsBtn');
 const markReadBtn = document.querySelector('#markReadBtn');
+const messageForm = document.querySelector('#messageForm');
+const messageRecipient = document.querySelector('#messageRecipient');
+const messageBody = document.querySelector('#messageBody');
+const refreshMessagesBtn = document.querySelector('#refreshMessagesBtn');
+const markMessagesReadBtn = document.querySelector('#markMessagesReadBtn');
+const messagesList = document.querySelector('#messagesList');
+const moderationInfo = document.querySelector('#moderationInfo');
+const myReports = document.querySelector('#myReports');
+const refreshReportsBtn = document.querySelector('#refreshReportsBtn');
+const adminReportsWrap = document.querySelector('#adminReportsWrap');
+const adminReports = document.querySelector('#adminReports');
 const manageBillingBtn = document.querySelector('#manageBillingBtn');
 const billingForm = document.querySelector('#billingForm');
 const cardLast4 = document.querySelector('#cardLast4');
@@ -119,7 +130,7 @@ const setAccountPanel = (panelName) => {
 
 const getPanelFromHash = () => {
   const value = window.location.hash.replace('#', '').trim();
-  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity', 'notifications']);
+  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity', 'notifications', 'messages', 'moderation']);
   return valid.has(value) ? value : 'profile';
 };
 
@@ -291,6 +302,98 @@ const loadNotifications = async (userId) => {
     .join('');
 };
 
+const loadMessages = async (userId) => {
+  if (!messagesList) {
+    return;
+  }
+
+  const { data, error } = await sb
+    .from('direct_messages')
+    .select('id,sender_id,recipient_id,body,is_read,created_at,sender_name,recipient_name')
+    .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+    .order('created_at', { ascending: false })
+    .limit(60);
+
+  if (error) {
+    messagesList.innerHTML = '<p class="note">Messages setup pending. Run SUPABASE_SETUP.sql.</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    messagesList.innerHTML = '<p class="note">No messages yet.</p>';
+    return;
+  }
+
+  messagesList.innerHTML = data
+    .map((item) => {
+      const incoming = item.recipient_id === userId;
+      const unread = incoming && !item.is_read ? ' unread' : '';
+      const peer = incoming ? item.sender_name || 'Member' : item.recipient_name || 'Member';
+      const direction = incoming ? 'From' : 'To';
+      return `<div class="mini-item${unread}"><span>${direction} ${peer}: ${item.body} - ${new Date(item.created_at).toLocaleString()}</span></div>`;
+    })
+    .join('');
+};
+
+const loadReports = async (userId, isAdmin) => {
+  if (!myReports) {
+    return;
+  }
+
+  const { data, error } = await sb
+    .from('reports')
+    .select('id,kind,target_type,target_id,reason,status,created_at')
+    .eq('reporter_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    myReports.innerHTML = '<p class="note">Reports setup pending. Run SUPABASE_SETUP.sql.</p>';
+  } else {
+    myReports.innerHTML =
+      !data || data.length === 0
+        ? '<p class="note">No reports filed yet.</p>'
+        : data
+            .map(
+              (item) =>
+                `<div class="mini-item"><span>${item.target_type} #${item.target_id} | ${item.kind} | ${item.status} | ${new Date(item.created_at).toLocaleString()}</span></div>`
+            )
+            .join('');
+  }
+
+  if (!adminReportsWrap || !adminReports) {
+    return;
+  }
+
+  if (!isAdmin) {
+    adminReportsWrap.hidden = true;
+    return;
+  }
+
+  adminReportsWrap.hidden = false;
+  const { data: queue, error: queueError } = await sb
+    .from('reports')
+    .select('id,target_type,target_id,reason,status,created_at')
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (queueError) {
+    adminReports.innerHTML = `<p class="note">${queueError.message}</p>`;
+    return;
+  }
+
+  adminReports.innerHTML =
+    !queue || queue.length === 0
+      ? '<p class="note">No open reports.</p>'
+      : queue
+          .map(
+            (item) =>
+              `<div class="mini-item"><span>${item.target_type} #${item.target_id} - ${item.reason}</span><button class="control-btn" data-resolve-report="${item.id}" type="button">Resolve</button></div>`
+          )
+          .join('');
+};
+
 const loadNetwork = async (userId) => {
   if (!networkStats) {
     return;
@@ -430,9 +533,28 @@ const renderSession = async () => {
     }
     renderAvatar(profile.avatar_url, profile.display_name);
 
-    await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id), loadNotifications(session.user.id)]);
+    await Promise.all([
+      loadNetwork(session.user.id),
+      loadActivity(session.user.id),
+      loadNotifications(session.user.id),
+      loadMessages(session.user.id),
+      loadReports(session.user.id, Boolean(profile.is_admin))
+    ]);
     renderBilling(session.user.id);
     hydrateUiPrefsForm();
+
+    if (moderationInfo) {
+      moderationInfo.textContent = profile.is_admin
+        ? 'You can review your reports and resolve open reports below.'
+        : 'Track reports you filed. Admin handles moderation queue.';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const prefillTo = String(params.get('to') || '').trim();
+    if (prefillTo && messageRecipient) {
+      messageRecipient.value = prefillTo;
+      setAccountPanel('messages');
+    }
   } catch (error) {
     // Keep account view visible even if profile/network queries fail.
     if (sessionText) {
@@ -890,6 +1012,173 @@ if (markReadBtn) {
     await sb.from('notifications').update({ is_read: true }).eq('recipient_id', session.user.id);
     await loadNotifications(session.user.id);
     setMessage('Notifications marked as read.');
+  });
+}
+
+if (messageForm) {
+  messageForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      setMessage('Please login first.', true);
+      return;
+    }
+
+    const toEmail = String(messageRecipient?.value || '').trim().toLowerCase();
+    const body = String(messageBody?.value || '').trim();
+    if (!toEmail || !body) {
+      setMessage('Add recipient and message body.', true);
+      return;
+    }
+
+    if (toEmail === String(session.user.email || '').toLowerCase()) {
+      setMessage('You cannot message yourself.', true);
+      return;
+    }
+
+    const { data: senderProfile } = await sb
+      .from('profiles')
+      .select('id,display_name')
+      .eq('id', session.user.id)
+      .single();
+
+    const { data: targetProfile, error: targetError } = await sb
+      .from('profiles')
+      .select('id,display_name')
+      .eq('email', toEmail)
+      .single();
+
+    if (targetError || !targetProfile) {
+      setMessage('Recipient not found.', true);
+      return;
+    }
+
+    const { error } = await sb.from('direct_messages').insert({
+      sender_id: session.user.id,
+      recipient_id: targetProfile.id,
+      sender_name: senderProfile?.display_name || session.user.email,
+      recipient_name: targetProfile.display_name,
+      body
+    });
+
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    await sb.from('notifications').insert({
+      recipient_id: targetProfile.id,
+      actor_id: session.user.id,
+      kind: 'message',
+      message: `${senderProfile?.display_name || session.user.email} sent you a message.`
+    });
+
+    messageForm.reset();
+    setMessage('Message sent.');
+    await loadMessages(session.user.id);
+    await loadNotifications(session.user.id);
+  });
+}
+
+if (refreshMessagesBtn) {
+  refreshMessagesBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+    await loadMessages(session.user.id);
+    setMessage('Messages refreshed.');
+  });
+}
+
+if (markMessagesReadBtn) {
+  markMessagesReadBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+
+    await sb
+      .from('direct_messages')
+      .update({ is_read: true })
+      .eq('recipient_id', session.user.id)
+      .eq('is_read', false);
+
+    await loadMessages(session.user.id);
+    setMessage('Received messages marked as read.');
+  });
+}
+
+if (refreshReportsBtn) {
+  refreshReportsBtn.addEventListener('click', async () => {
+    if (!guardSupabase()) {
+      return;
+    }
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+    const profile = await getProfile(session.user.id);
+    await loadReports(session.user.id, Boolean(profile.is_admin));
+    setMessage('Reports refreshed.');
+  });
+}
+
+if (adminReports) {
+  adminReports.addEventListener('click', async (event) => {
+    const btn = event.target.closest('button[data-resolve-report]');
+    if (!btn || !guardSupabase()) {
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+    if (!session?.user) {
+      return;
+    }
+
+    const profile = await getProfile(session.user.id);
+    if (!profile.is_admin) {
+      setMessage('Admin only action.', true);
+      return;
+    }
+
+    const reportId = Number(btn.getAttribute('data-resolve-report'));
+    if (!reportId) {
+      return;
+    }
+
+    const { error } = await sb
+      .from('reports')
+      .update({ status: 'resolved', resolved_by: session.user.id, resolved_at: new Date().toISOString() })
+      .eq('id', reportId);
+
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    await loadReports(session.user.id, true);
+    setMessage('Report resolved.');
   });
 }
 
