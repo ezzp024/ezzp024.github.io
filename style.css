@@ -516,6 +516,16 @@ textarea {
   background: rgba(4, 16, 30, 0.92);
 }
 
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.65rem 0.72rem;
+  font: inherit;
+  color: var(--text);
+  background: rgba(4, 16, 30, 0.92);
+}
+
 .btn {
   border: 1px solid transparent;
   border-radius: 999px;
@@ -793,6 +803,16 @@ textarea {
   gap: 0.6rem;
 }
 
+.inline-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-check input {
+  width: auto;
+}
+
 .settings-form input:disabled {
   opacity: 0.75;
   cursor: not-allowed;
@@ -964,6 +984,52 @@ textarea {
 .panel-page {
   margin-top: 2rem;
   padding: 1rem;
+}
+
+body.layout-compact .hero,
+body.layout-compact .forum-hero,
+body.layout-compact .card,
+body.layout-compact .thread,
+body.layout-compact .thread-form,
+body.layout-compact .auth-form,
+body.layout-compact .profile-box {
+  border-radius: 12px;
+}
+
+body.layout-compact .hero,
+body.layout-compact .forum-hero,
+body.layout-compact .side-panel,
+body.layout-compact .forum-center,
+body.layout-compact .account-wrap,
+body.layout-compact .account-side {
+  padding: 0.8rem;
+}
+
+body.layout-compact .thread,
+body.layout-compact .mini-item,
+body.layout-compact .billing-card {
+  padding: 0.6rem;
+}
+
+body.motion-reduced *,
+body.motion-reduced *::before,
+body.motion-reduced *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+body.hide-social .social-strip,
+body.hide-social .social-stack,
+body.hide-social .social-links {
+  display: none !important;
+}
+
+body.forum-focus .forum-layout {
+  grid-template-columns: 1fr;
+}
+
+body.forum-focus .forum-layout .side-panel {
+  display: none;
 }
 
 .reveal {

@@ -108,6 +108,21 @@
             <button id="linkGithubBtn" class="btn btn-ghost" type="button">Link GitHub (Soon)</button>
             <button id="linkDiscordBtn" class="btn btn-ghost" type="button">Link Discord (Soon)</button>
           </div>
+
+          <h3>Interface Controls</h3>
+          <form id="uiPrefsForm" class="settings-form">
+            <label class="inline-check"><input id="compactLayout" type="checkbox" /> Compact layout</label>
+            <label class="inline-check"><input id="reduceMotion" type="checkbox" /> Reduce motion effects</label>
+            <label class="inline-check"><input id="hideSocial" type="checkbox" /> Hide social blocks</label>
+            <label>
+              Default feed sort
+              <select id="defaultFeedSort">
+                <option value="hot">Hot</option>
+                <option value="new">New</option>
+              </select>
+            </label>
+            <button class="btn btn-primary" type="submit">Save Interface Preferences</button>
+          </form>
         </section>
 
         <section class="profile-box account-panel" data-panel="billing">

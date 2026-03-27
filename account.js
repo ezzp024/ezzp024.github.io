@@ -25,6 +25,11 @@ const confirmPassword = document.querySelector('#confirmPassword');
 const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
 const linkGithubBtn = document.querySelector('#linkGithubBtn');
 const linkDiscordBtn = document.querySelector('#linkDiscordBtn');
+const uiPrefsForm = document.querySelector('#uiPrefsForm');
+const compactLayout = document.querySelector('#compactLayout');
+const reduceMotion = document.querySelector('#reduceMotion');
+const hideSocial = document.querySelector('#hideSocial');
+const defaultFeedSort = document.querySelector('#defaultFeedSort');
 
 const followForm = document.querySelector('#followForm');
 const followEmail = document.querySelector('#followEmail');
@@ -51,6 +56,7 @@ const accountPanels = document.querySelectorAll('.account-panel');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
 const BILLING_KEY = 'polly_billing_map';
+const UI_PREFS_KEY = 'polly_ui_prefs';
 
 const setMessage = (message, isError = false) => {
   if (!authMessage) {
@@ -170,6 +176,45 @@ const renderBilling = (userId) => {
   }
   if (cardLast4) {
     cardLast4.value = data.last4 || '';
+  }
+};
+
+const readUiPrefs = () => {
+  if (typeof window.getUiPrefs === 'function') {
+    return window.getUiPrefs();
+  }
+  try {
+    const raw = localStorage.getItem(UI_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeUiPrefs = (value) => {
+  localStorage.setItem(UI_PREFS_KEY, JSON.stringify(value));
+  if (typeof window.applyUiPrefs === 'function') {
+    window.applyUiPrefs();
+  }
+};
+
+const hydrateUiPrefsForm = () => {
+  if (!uiPrefsForm) {
+    return;
+  }
+
+  const prefs = readUiPrefs();
+  if (compactLayout) {
+    compactLayout.checked = Boolean(prefs.compactLayout);
+  }
+  if (reduceMotion) {
+    reduceMotion.checked = Boolean(prefs.reduceMotion);
+  }
+  if (hideSocial) {
+    hideSocial.checked = Boolean(prefs.hideSocial);
+  }
+  if (defaultFeedSort) {
+    defaultFeedSort.value = prefs.defaultFeedSort === 'new' ? 'new' : 'hot';
   }
 };
 
@@ -387,6 +432,7 @@ const renderSession = async () => {
 
     await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id), loadNotifications(session.user.id)]);
     renderBilling(session.user.id);
+    hydrateUiPrefsForm();
   } catch (error) {
     // Keep account view visible even if profile/network queries fail.
     if (sessionText) {
@@ -709,6 +755,21 @@ if (billingForm) {
     writeBillingMap(map);
     renderBilling(session.user.id);
     setMessage('Payment method saved.');
+  });
+}
+
+if (uiPrefsForm) {
+  uiPrefsForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const prefs = {
+      compactLayout: Boolean(compactLayout?.checked),
+      reduceMotion: Boolean(reduceMotion?.checked),
+      hideSocial: Boolean(hideSocial?.checked),
+      defaultFeedSort: defaultFeedSort?.value === 'new' ? 'new' : 'hot'
+    };
+
+    writeUiPrefs(prefs);
+    setMessage('Interface preferences saved.');
   });
 }
 

@@ -3,6 +3,28 @@ const topnav = document.querySelector('.topnav');
 const topbar = document.querySelector('.topbar');
 const revealItems = document.querySelectorAll('.reveal');
 
+const UI_PREFS_KEY = 'polly_ui_prefs';
+
+const readUiPrefs = () => {
+  try {
+    const raw = localStorage.getItem(UI_PREFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const applyUiPrefs = () => {
+  const prefs = readUiPrefs();
+  document.body.classList.toggle('layout-compact', Boolean(prefs.compactLayout));
+  document.body.classList.toggle('motion-reduced', Boolean(prefs.reduceMotion));
+  document.body.classList.toggle('hide-social', Boolean(prefs.hideSocial));
+};
+
+window.getUiPrefs = readUiPrefs;
+window.applyUiPrefs = applyUiPrefs;
+applyUiPrefs();
+
 if (menuToggle && topnav) {
   menuToggle.addEventListener('click', () => {
     const expanded = menuToggle.getAttribute('aria-expanded') === 'true';

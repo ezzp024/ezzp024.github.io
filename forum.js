@@ -7,11 +7,13 @@ const composerHint = document.querySelector('#composerHint');
 const threadCount = document.querySelector('#threadCount');
 const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
+const focusModeBtn = document.querySelector('#focusModeBtn');
 const feedSearch = document.querySelector('#feedSearch');
 const clearSearchBtn = document.querySelector('#clearSearchBtn');
 const topicChips = document.querySelectorAll('.chip');
 
-let currentSort = 'hot';
+const initialPrefs = typeof window.getUiPrefs === 'function' ? window.getUiPrefs() : {};
+let currentSort = initialPrefs.defaultFeedSort === 'new' ? 'new' : 'hot';
 let currentUser = null;
 let currentProfile = null;
 let activeTopic = 'all';
@@ -496,6 +498,9 @@ topicChips.forEach((chip) => {
 
 sortTabs.forEach((tab) => {
   tab.addEventListener('click', async () => {
+    if (tab.id === 'focusModeBtn') {
+      return;
+    }
     sortTabs.forEach((item) => {
       item.classList.remove('active');
       item.setAttribute('aria-selected', 'false');
@@ -512,10 +517,38 @@ sortTabs.forEach((tab) => {
   });
 });
 
+if (focusModeBtn) {
+  const setFocus = (enabled) => {
+    document.body.classList.toggle('forum-focus', enabled);
+    focusModeBtn.textContent = enabled ? 'Exit Focus' : 'Focus';
+  };
+
+  const focusEnabled = Boolean(initialPrefs.forumFocusMode);
+  setFocus(focusEnabled);
+
+  focusModeBtn.addEventListener('click', () => {
+    const enabled = !document.body.classList.contains('forum-focus');
+    setFocus(enabled);
+
+    const prefs = typeof window.getUiPrefs === 'function' ? window.getUiPrefs() : {};
+    prefs.forumFocusMode = enabled;
+    localStorage.setItem('polly_ui_prefs', JSON.stringify(prefs));
+  });
+}
+
 const boot = async () => {
   if (!guardSupabase()) {
     return;
   }
+
+  sortTabs.forEach((item) => {
+    if (item.id === 'focusModeBtn') {
+      return;
+    }
+    const active = item.dataset.sort === currentSort;
+    item.classList.toggle('active', active);
+    item.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
 
   try {
     await loadSession();
