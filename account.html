@@ -11,7 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
   <div class="water-bg" aria-hidden="true">
@@ -36,7 +36,7 @@
       <p class="tag">Profile Access</p>
       <h1 id="accountHeading">Account</h1>
       <p id="accountSub" class="account-sub">Secure sign-in and a clear account hub for profile, settings, and workspace tools.</p>
-      <div id="guestAuthSection" hidden>
+      <div id="guestAuthSection">
         <div class="sort-tabs" role="tablist" aria-label="Account tabs">
           <button class="auth-tab active" data-auth-tab="register" role="tab" aria-selected="true">Register</button>
           <button class="auth-tab" data-auth-tab="login" role="tab" aria-selected="false">Login</button>
@@ -73,11 +73,16 @@
 
         <section class="profile-box">
           <h3>Account Hub</h3>
+          <p class="note">Start with profile and security, then use tools as needed.</p>
+          <h4>Primary</h4>
           <div class="list-grid">
             <a class="mini-item" href="profile.html">Edit Profile</a>
             <a class="mini-item" href="settings.html">Security & Preferences</a>
             <a class="mini-item" href="network.html">Friends & Followers</a>
             <a class="mini-item" href="activity.html">My Threads & Likes</a>
+          </div>
+          <h4>Workspace Tools</h4>
+          <div class="list-grid">
             <a class="mini-item" href="notifications.html">Notifications</a>
             <a class="mini-item" href="messages.html">Direct Messages</a>
             <a class="mini-item" href="moderation.html">Moderation & Reports</a>
@@ -113,7 +118,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js?v=4"></script>
   <script src="supabase.js?v=4"></script>
-  <script src="app.js?v=4"></script>
-  <script src="account.js?v=7"></script>
+  <script src="app.js?v=5"></script>
+  <script src="account.js?v=8"></script>
 </body>
 </html>

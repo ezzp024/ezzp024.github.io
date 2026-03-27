@@ -26,6 +26,11 @@ window.applyUiPrefs = applyUiPrefs;
 applyUiPrefs();
 
 if (menuToggle && topnav) {
+  if (!topnav.id) {
+    topnav.id = 'mainTopnav';
+  }
+  menuToggle.setAttribute('aria-controls', topnav.id);
+
   const closeMobileNav = () => {
     menuToggle.setAttribute('aria-expanded', 'false');
     topnav.classList.remove('open');
@@ -54,6 +59,13 @@ if (menuToggle && topnav) {
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+      closeMobileNav();
+      menuToggle.focus();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 860) {
       closeMobileNav();
     }
   });
@@ -151,30 +163,33 @@ const renderUserMenu = async () => {
     return;
   }
 
-  const { data: profile } = await window.sb
-    .from('profiles')
-    .select('display_name,is_admin')
-    .eq('id', session.user.id)
-    .single();
+  let profile = null;
+  try {
+    const { data } = await window.sb.from('profiles').select('display_name,is_admin').eq('id', session.user.id).single();
+    profile = data || null;
+  } catch {
+    profile = null;
+  }
 
   const name = profile?.display_name || session.user.email || 'Member';
   const initial = String(name).trim().charAt(0).toUpperCase();
-  const adminLink = profile?.is_admin ? '<a href="admin.html">Admin</a>' : '';
+  const adminLink = profile?.is_admin ? '<a role="menuitem" href="admin.html">Admin</a>' : '';
 
+  const menuId = 'topbar-user-menu';
   wrapper.innerHTML = `
-    <button class="user-link user-trigger" type="button" aria-expanded="false" aria-haspopup="menu">
+    <button class="user-link user-trigger" type="button" aria-expanded="false" aria-haspopup="menu" aria-controls="${menuId}">
       <span class="avatar tiny-avatar">${initial}</span>
       <span>${name}</span>
     </button>
-    <div class="user-menu" hidden>
-      <a href="profile.html">Profile</a>
-      <a href="settings.html">Settings</a>
-      <a href="network.html">Friends</a>
-      <a href="notifications.html">Notifications</a>
-      <a href="messages.html">Messages</a>
-      <a href="moderation.html">Moderation</a>
+    <div id="${menuId}" class="user-menu" role="menu" hidden>
+      <a role="menuitem" href="profile.html">Profile</a>
+      <a role="menuitem" href="settings.html">Settings</a>
+      <a role="menuitem" href="network.html">Friends</a>
+      <a role="menuitem" href="notifications.html">Notifications</a>
+      <a role="menuitem" href="messages.html">Messages</a>
+      <a role="menuitem" href="moderation.html">Moderation</a>
       ${adminLink}
-      <button id="topbarLogoutBtn" type="button">Logout</button>
+      <button id="topbarLogoutBtn" role="menuitem" type="button">Logout</button>
     </div>
   `;
 
@@ -207,6 +222,12 @@ const renderUserMenu = async () => {
       const first = wrapper.querySelector('.user-menu a, .user-menu button');
       first?.focus();
     }
+  });
+
+  menu?.querySelectorAll('a,button').forEach((item) => {
+    item.addEventListener('click', () => {
+      closeUserMenu();
+    });
   });
 
   wrapper.addEventListener('keydown', (event) => {

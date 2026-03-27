@@ -126,7 +126,7 @@ const setUiForLoggedState = (loggedIn) => {
       accountHeading.textContent = 'Register or Login';
     }
     if (accountSub) {
-      accountSub.textContent = 'Secure sign-in, profile controls, and community settings in one place.';
+      accountSub.textContent = 'Secure sign-in and account setup for posting, messaging, and moderation workflows.';
     }
   } else {
     if (accountHeading) {
@@ -687,5 +687,5 @@ if (sb?.auth?.onAuthStateChange) {
   });
 }
 
-setUiForLoggedState(true);
+setUiForLoggedState(false);
 renderSession();

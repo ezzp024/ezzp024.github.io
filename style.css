@@ -216,11 +216,17 @@ main,
   text-decoration: none;
   font-weight: 600;
   opacity: 0.9;
+   border: 1px solid transparent;
+   border-radius: 999px;
+   padding: 0.28rem 0.55rem;
+   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .topnav a.active,
 .topnav a:hover {
   color: var(--mint);
+  border-color: rgba(131, 255, 216, 0.42);
+  background: rgba(8, 24, 42, 0.5);
 }
 
 .menu-toggle {
@@ -231,6 +237,12 @@ main,
   color: var(--text);
   font: inherit;
   padding: 0.42rem 0.8rem;
+  cursor: pointer;
+}
+
+.menu-toggle:hover {
+  border-color: rgba(131, 255, 216, 0.48);
+  color: var(--mint);
 }
 
 h1,
@@ -584,6 +596,11 @@ select {
   animation: threadIn 0.4s ease;
 }
 
+.thread > p {
+  margin: 0.55rem 0 0;
+  color: #cce3f4;
+}
+
 .thread-highlight {
   outline: 2px solid rgba(131, 255, 216, 0.7);
   outline-offset: 2px;
@@ -675,6 +692,40 @@ select {
 
 .control-btn:hover {
   border-color: rgba(131, 255, 216, 0.5);
+}
+
+.control-btn:active,
+.btn:active,
+.tab:active,
+.auth-tab:active,
+.account-tab:active,
+.user-link:active {
+  transform: translateY(1px);
+}
+
+.empty-state {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.95rem;
+  background: rgba(8, 23, 41, 0.72);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.empty-state h3 {
+  margin: 0;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #c8def0;
+  display: grid;
+  gap: 0.35rem;
 }
 
 .replies {
@@ -885,6 +936,11 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.mini-item:hover {
+  border-color: rgba(131, 255, 216, 0.46);
+  color: var(--mint);
 }
 
 .mini-item.unread {
@@ -1176,4 +1232,12 @@ textarea:focus-visible,
 select:focus-visible {
   outline: 2px solid var(--mint);
   outline-offset: 2px;
+}
+
+.topnav a:focus-visible,
+.user-menu a:focus-visible,
+.user-menu button:focus-visible,
+.control-btn:focus-visible,
+.mini-item:focus-visible {
+  box-shadow: 0 0 0 3px rgba(131, 255, 216, 0.2);
 }

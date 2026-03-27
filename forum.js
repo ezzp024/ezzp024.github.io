@@ -165,11 +165,11 @@ const updateSidePanels = async () => {
   if (categoryStats) {
     if (allThreads.length === 0) {
       categoryStats.innerHTML = [
-        '<li><span>#</span>general (start your first architecture thread)</li>',
-        '<li><span>#</span>debug (post logs and reproduction steps)</li>',
-        '<li><span>#</span>api (share contracts and edge cases)</li>',
-        '<li><span>#</span>frontend (ship UI and accessibility fixes)</li>',
-        '<li><span>#</span>automation (workflows, scripts, CI)</li>'
+        '<li><span>#</span>general (0)</li>',
+        '<li><span>#</span>debug (0)</li>',
+        '<li><span>#</span>api (0)</li>',
+        '<li><span>#</span>frontend (0)</li>',
+        '<li><span>#</span>automation (0)</li>'
       ].join('');
     } else {
     const counts = new Map();
@@ -202,7 +202,7 @@ const updateSidePanels = async () => {
     const recentThreads = allThreads.slice(0, 4);
     liveActivity.innerHTML =
       recentThreads.length === 0
-        ? '<li>Launch window: no posts yet. Start the first thread and set the tone.</li>'
+        ? '<li>No thread activity yet. Start a first post to seed the feed.</li>'
         : recentThreads
             .map((thread) => `<li><strong>${escapeHtml(thread.author_name)}</strong> posted <a class="author-link" href="forum.html?t=${thread.id}">${escapeHtml(thread.title)}</a></li>`)
             .join('');
@@ -237,7 +237,7 @@ const renderThreads = async () => {
   if (threads.length === 0) {
     threadFeed.innerHTML =
       allThreads.length === 0
-        ? '<div class="empty-state"><h3>Community is live, waiting on first posts</h3><p>Open a thread with context, expected behavior, and what you already tried.</p><div class="session-actions"><a class="btn btn-primary" href="account.html">Create account</a><a class="btn btn-ghost" href="https://github.com/ezzp024/ezzp024.github.io/issues/new" target="_blank" rel="noopener noreferrer">Submit issue</a></div></div>'
+        ? '<div class="empty-state"><h3>Start the first technical thread</h3><p>This community is live and ready for real discussions. Share a concrete build update or a reproducible issue.</p><ul class="empty-state-list"><li>Use a clear title and include environment details.</li><li>Pick the category that matches your topic.</li><li>List what you already tried before asking for help.</li></ul><div class="session-actions"><a class="btn btn-primary" href="account.html">Create account</a><a class="btn btn-ghost" href="https://github.com/ezzp024/ezzp024.github.io/issues/new" target="_blank" rel="noopener noreferrer">Report site issue</a></div></div>'
         : '<p class="note">No threads match your current filters.</p>';
     await updateSidePanels();
     return;
@@ -278,14 +278,14 @@ const renderThreads = async () => {
       <p>${escapeHtml(thread.body)}</p>
       <div class="thread-controls">
         <button class="control-btn" data-action="upvote" data-thread-id="${thread.id}">${thread.user_upvoted ? 'Upvoted' : 'Upvote'} (${thread.upvote_count})</button>
-        <button class="control-btn" data-action="collapse" data-thread-id="${thread.id}">Collapse</button>
+        <button class="control-btn" data-action="collapse" data-thread-id="${thread.id}" aria-expanded="true" aria-controls="replies-${thread.id} reply-form-${thread.id}">Collapse</button>
         <a class="control-btn" href="messages.html?to=${encodeURIComponent(thread.author_email || '')}">Message</a>
         <button class="control-btn" data-action="report" data-thread-id="${thread.id}">Report</button>
       </div>
-      <section class="replies" data-replies-id="${thread.id}">
+      <section id="replies-${thread.id}" class="replies" data-replies-id="${thread.id}">
         ${repliesHTML || '<p class="note">No replies yet.</p>'}
       </section>
-      <form class="reply-form" data-reply-form-id="${thread.id}" data-thread-id="${thread.id}">
+      <form id="reply-form-${thread.id}" class="reply-form" data-reply-form-id="${thread.id}" data-thread-id="${thread.id}">
         <input name="reply" maxlength="250" required placeholder="Write a reply..." />
         <button class="btn btn-ghost" type="submit">Reply</button>
       </form>
@@ -457,6 +457,7 @@ if (threadFeed) {
       if (replyForm) {
         replyForm.classList.toggle('collapsed', collapsed);
       }
+      button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
       button.textContent = collapsed ? 'Expand' : 'Collapse';
       return;
     }
