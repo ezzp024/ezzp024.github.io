@@ -76,9 +76,6 @@
           <button class="account-tab" data-panel="settings" type="button">Settings</button>
           <button class="account-tab" data-panel="network" type="button">Friends</button>
           <button class="account-tab" data-panel="activity" type="button">Threads</button>
-          <button class="account-tab" data-panel="notifications" type="button">Notifications</button>
-          <button class="account-tab" data-panel="messages" type="button">Messages</button>
-          <button class="account-tab" data-panel="moderation" type="button">Moderation</button>
         </div>
 
         <section class="profile-box account-panel active" data-panel="profile">
@@ -158,39 +155,12 @@
           </div>
         </section>
 
-        <section class="profile-box account-panel" data-panel="notifications">
-          <h3>Notifications</h3>
-          <div class="session-actions">
-            <button id="refreshNotificationsBtn" class="btn btn-ghost" type="button">Refresh</button>
-            <button id="markReadBtn" class="btn btn-ghost" type="button">Mark all read</button>
-          </div>
-          <div id="notificationsList" class="mini-list"></div>
-        </section>
-
-        <section class="profile-box account-panel" data-panel="messages">
-          <h3>Direct Messages</h3>
-          <form id="messageForm" class="settings-form">
-            <label>Recipient email <input id="messageRecipient" type="email" placeholder="friend@email.com" required /></label>
-            <label>Message <textarea id="messageBody" rows="3" maxlength="600" placeholder="Write your message" required></textarea></label>
-            <button class="btn btn-primary" type="submit">Send Message</button>
-          </form>
-          <div class="session-actions">
-            <button id="refreshMessagesBtn" class="btn btn-ghost" type="button">Refresh</button>
-            <button id="markMessagesReadBtn" class="btn btn-ghost" type="button">Mark all received as read</button>
-          </div>
-          <div id="messagesList" class="mini-list"></div>
-        </section>
-
-        <section class="profile-box account-panel" data-panel="moderation">
-          <h3>Moderation & Reports</h3>
-          <p id="moderationInfo" class="note">Track your reports and admin moderation actions.</p>
-          <div class="session-actions">
-            <button id="refreshReportsBtn" class="btn btn-ghost" type="button">Refresh Reports</button>
-          </div>
-          <div id="myReports" class="mini-list"></div>
-          <div id="adminReportsWrap" hidden>
-            <h4>Admin Queue</h4>
-            <div id="adminReports" class="mini-list"></div>
+        <section class="profile-box">
+          <h3>Workspace Tools</h3>
+          <div class="list-grid">
+            <a class="mini-item" href="notifications.html">Notifications Center</a>
+            <a class="mini-item" href="messages.html">Direct Messages</a>
+            <a class="mini-item" href="moderation.html">Moderation & Reports</a>
           </div>
         </section>
       </div>
@@ -221,9 +191,9 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=3"></script>
-  <script src="supabase.js?v=3"></script>
-  <script src="app.js?v=3"></script>
-  <script src="account.js?v=3"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="account.js?v=4"></script>
 </body>
 </html>

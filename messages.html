@@ -2,12 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=account.html#messages" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting to Messages</title>
+  <title>Polly Tunnels | Messages</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting to messages...</p>
-  <script>window.location.replace('account.html#messages');</script>
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+  <main class="account-main">
+    <section class="card panel-page reveal">
+      <p class="tag">Direct Messages</p>
+      <h1>Inbox</h1>
+      <form id="messageForm" class="settings-form">
+        <label>Recipient email <input id="messageRecipient" type="email" required /></label>
+        <label>Message <textarea id="messageBody" rows="4" maxlength="600" required></textarea></label>
+        <button class="btn btn-primary" type="submit">Send</button>
+      </form>
+      <div class="session-actions">
+        <button id="refreshMessagesBtn" class="btn btn-ghost" type="button">Refresh</button>
+        <button id="markMessagesReadBtn" class="btn btn-ghost" type="button">Mark received as read</button>
+      </div>
+      <p id="messagesMessage" class="note"></p>
+      <div id="messagesList" class="mini-list"></div>
+    </section>
+  </main>
+  <footer class="footer">
+    <p>Polly Tunnels</p>
+    <div class="footer-links">
+      <a href="forum.html">Forum</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="messages.js?v=1"></script>
 </body>
 </html>

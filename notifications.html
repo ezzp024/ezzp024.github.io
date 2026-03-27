@@ -2,12 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=account.html#notifications" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting to Notifications</title>
+  <title>Polly Tunnels | Notifications</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting to notifications...</p>
-  <script>window.location.replace('account.html#notifications');</script>
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+  <main class="account-main">
+    <section class="card panel-page reveal">
+      <p class="tag">Notifications</p>
+      <h1>Your Alerts</h1>
+      <div class="session-actions">
+        <button id="refreshNotificationsBtn" class="btn btn-ghost" type="button">Refresh</button>
+        <button id="markReadBtn" class="btn btn-ghost" type="button">Mark all read</button>
+      </div>
+      <p id="notificationsMessage" class="note"></p>
+      <div id="notificationsList" class="mini-list"></div>
+    </section>
+  </main>
+  <footer class="footer">
+    <p>Polly Tunnels</p>
+    <div class="footer-links">
+      <a href="forum.html">Forum</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="notifications.js?v=1"></script>
 </body>
 </html>

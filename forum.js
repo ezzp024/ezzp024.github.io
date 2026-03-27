@@ -11,6 +11,9 @@ const focusModeBtn = document.querySelector('#focusModeBtn');
 const feedSearch = document.querySelector('#feedSearch');
 const categoryFilter = document.querySelector('#categoryFilter');
 const clearSearchBtn = document.querySelector('#clearSearchBtn');
+const categoryStats = document.querySelector('#categoryStats');
+const recentMembers = document.querySelector('#recentMembers');
+const liveActivity = document.querySelector('#liveActivity');
 
 const initialPrefs = typeof window.getUiPrefs === 'function' ? window.getUiPrefs() : {};
 let currentSort = initialPrefs.defaultFeedSort === 'new' ? 'new' : 'hot';
@@ -158,6 +161,44 @@ const getThreads = async () => {
   return combined.sort((a, b) => hotScore(b) - hotScore(a));
 };
 
+const updateSidePanels = async () => {
+  if (categoryStats) {
+    const counts = new Map();
+    allThreads.forEach((thread) => {
+      const key = thread.category || 'general';
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+
+    const categories = ['general', 'debug', 'api', 'frontend', 'automation'];
+    categoryStats.innerHTML = categories
+      .map((cat) => `<li><span>#</span>${cat} (${counts.get(cat) || 0})</li>`)
+      .join('');
+  }
+
+  if (recentMembers) {
+    const { data } = await sb
+      .from('profiles')
+      .select('display_name')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    recentMembers.innerHTML =
+      !data || data.length === 0
+        ? '<li><span>#</span>No members yet</li>'
+        : data.map((member) => `<li><span>#</span>${escapeHtml(member.display_name)}</li>`).join('');
+  }
+
+  if (liveActivity) {
+    const recentThreads = allThreads.slice(0, 4);
+    liveActivity.innerHTML =
+      recentThreads.length === 0
+        ? '<li>No activity yet. Be first to post.</li>'
+        : recentThreads
+            .map((thread) => `<li><strong>${escapeHtml(thread.author_name)}</strong> posted <a class="author-link" href="forum.html?t=${thread.id}">${escapeHtml(thread.title)}</a></li>`)
+            .join('');
+  }
+};
+
 const renderThreads = async () => {
   if (!threadFeed) {
     return;
@@ -186,8 +227,9 @@ const renderThreads = async () => {
   if (threads.length === 0) {
     threadFeed.innerHTML =
       allThreads.length === 0
-        ? '<p class="note">No threads yet. Start the first one.</p>'
+        ? '<div class="empty-state"><h3>No threads yet</h3><p>Start the first conversation for this category.</p><a class="btn btn-primary" href="account.html">Create your account</a></div>'
         : '<p class="note">No threads match your current filters.</p>';
+    await updateSidePanels();
     return;
   }
 
@@ -251,6 +293,8 @@ const renderThreads = async () => {
       setTimeout(() => target.classList.remove('thread-highlight'), 1800);
     }
   }
+
+  await updateSidePanels();
 };
 
 const requireApprovedUser = () => {

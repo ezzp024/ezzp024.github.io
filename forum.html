@@ -46,14 +46,10 @@
 
     <section class="forum-layout reveal delay-1">
       <aside class="card side-panel">
-        <h2>Channels</h2>
-        <ul class="channel-list">
-          <li><span>#</span>general-chat</li>
-          <li><span>#</span>web-development</li>
-          <li><span>#</span>debug-help</li>
-          <li><span>#</span>app-showcase</li>
-          <li><span>#</span>automation-lab</li>
-        </ul>
+        <h2>Category Stats</h2>
+        <ul id="categoryStats" class="channel-list"></ul>
+        <h3>Recent Members</h3>
+        <ul id="recentMembers" class="channel-list"></ul>
       </aside>
 
       <section class="card forum-center" id="feed">
@@ -109,16 +105,12 @@
         <div id="threadFeed" class="thread-feed"></div>
       </section>
 
-      <aside class="card side-panel">
-        <h2>Forum Flow</h2>
-        <ul class="flow-list">
-          <li>1) Register on the Account page</li>
-          <li>2) Create a thread with full context</li>
-          <li>3) Reply in threads and upvote strong answers</li>
-          <li>4) Collapse long threads for easier reading</li>
-        </ul>
+      <aside class="card side-panel" id="liveActivityPanel">
+        <h2>Live Activity</h2>
+        <ul id="liveActivity" class="flow-list"></ul>
         <a class="btn btn-ghost side-btn" href="account.html">Open Account</a>
       </aside>
+
     </section>
   </main>
 
@@ -134,9 +126,9 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=3"></script>
-  <script src="supabase.js?v=3"></script>
-  <script src="app.js?v=3"></script>
-  <script src="forum.js?v=3"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="forum.js?v=4"></script>
 </body>
 </html>

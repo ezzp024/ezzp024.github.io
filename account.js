@@ -23,8 +23,6 @@ const passwordForm = document.querySelector('#passwordForm');
 const newPassword = document.querySelector('#newPassword');
 const confirmPassword = document.querySelector('#confirmPassword');
 const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
-const linkGithubBtn = document.querySelector('#linkGithubBtn');
-const linkDiscordBtn = document.querySelector('#linkDiscordBtn');
 const uiPrefsForm = document.querySelector('#uiPrefsForm');
 const compactLayout = document.querySelector('#compactLayout');
 const reduceMotion = document.querySelector('#reduceMotion');
@@ -59,6 +57,8 @@ const cardLast4 = document.querySelector('#cardLast4');
 const cardMask = document.querySelector('#cardMask');
 const planName = document.querySelector('#planName');
 const planStatus = document.querySelector('#planStatus');
+const linkGithubBtn = document.querySelector('#linkGithubBtn');
+const linkDiscordBtn = document.querySelector('#linkDiscordBtn');
 
 const authTabs = document.querySelectorAll('.auth-tab');
 const authForms = document.querySelectorAll('.auth-form');
@@ -66,7 +66,6 @@ const accountTabs = document.querySelectorAll('.account-tab');
 const accountPanels = document.querySelectorAll('.account-panel');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
-const BILLING_KEY = 'polly_billing_map';
 const UI_PREFS_KEY = 'polly_ui_prefs';
 
 const setMessage = (message, isError = false) => {
@@ -130,7 +129,7 @@ const setAccountPanel = (panelName) => {
 
 const getPanelFromHash = () => {
   const value = window.location.hash.replace('#', '').trim();
-  const valid = new Set(['profile', 'settings', 'network', 'activity', 'notifications', 'messages', 'moderation']);
+  const valid = new Set(['profile', 'settings', 'network', 'activity']);
   return valid.has(value) ? value : 'profile';
 };
 
@@ -154,39 +153,8 @@ const setUiForLoggedState = (loggedIn) => {
       accountHeading.textContent = 'My Account';
     }
     if (accountSub) {
-      accountSub.textContent = 'Manage your profile, settings, social graph, messaging, and activity.';
+      accountSub.textContent = 'Manage your profile, settings, network, and activity.';
     }
-  }
-};
-
-const readBillingMap = () => {
-  try {
-    const raw = localStorage.getItem(BILLING_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-};
-
-const writeBillingMap = (value) => {
-  localStorage.setItem(BILLING_KEY, JSON.stringify(value));
-};
-
-const renderBilling = (userId) => {
-  const map = readBillingMap();
-  const data = map[userId] || { plan: 'Starter', status: 'Free community access', last4: '' };
-
-  if (planName) {
-    planName.textContent = data.plan;
-  }
-  if (planStatus) {
-    planStatus.textContent = data.status;
-  }
-  if (cardMask) {
-    cardMask.textContent = data.last4 ? `Visa •••• ${data.last4}` : 'No card saved';
-  }
-  if (cardLast4) {
-    cardLast4.value = data.last4 || '';
   }
 };
 
@@ -533,28 +501,8 @@ const renderSession = async () => {
     }
     renderAvatar(profile.avatar_url, profile.display_name);
 
-    await Promise.all([
-      loadNetwork(session.user.id),
-      loadActivity(session.user.id),
-      loadNotifications(session.user.id),
-      loadMessages(session.user.id),
-      loadReports(session.user.id, Boolean(profile.is_admin))
-    ]);
-    renderBilling(session.user.id);
+    await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
     hydrateUiPrefsForm();
-
-    if (moderationInfo) {
-      moderationInfo.textContent = profile.is_admin
-        ? 'You can review your reports and resolve open reports below.'
-        : 'Track reports you filed. Admin handles moderation queue.';
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const prefillTo = String(params.get('to') || '').trim();
-    if (prefillTo && messageRecipient) {
-      messageRecipient.value = prefillTo;
-      setAccountPanel('messages');
-    }
   } catch (error) {
     // Keep account view visible even if profile/network queries fail.
     if (sessionText) {
