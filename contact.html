@@ -19,14 +19,39 @@
   <main class="home-main">
     <section class="card panel-page reveal">
       <p class="tag">Contact</p>
-      <h1>Contact</h1>
-      <p>Use the channels below for support, moderation requests, and partnership inquiries.</p>
-      <h3>Support</h3>
-      <p>For login, account, and data requests, include your account email and a short issue summary.</p>
+      <h1>Contact & Support</h1>
+      <p>Use one of the direct channels below for account support, moderation, or bug reports.</p>
+      <h3>Direct Channels</h3>
+      <div class="list-grid">
+        <a class="mini-item" href="messages.html">In-App Messages</a>
+        <a class="mini-item" href="moderation.html">Moderation Center</a>
+        <a class="mini-item" href="https://github.com/ezzp024/ezzp024.github.io/issues/new" target="_blank" rel="noopener noreferrer">GitHub Issue Tracker</a>
+      </div>
+
+      <h3>Quick Contact Form</h3>
+      <p>Submit details below to open a prefilled support issue on the official repository.</p>
+      <form id="contactIssueForm" class="settings-form">
+        <label>Topic
+          <select id="contactTopic" required>
+            <option value="account">Account</option>
+            <option value="forum">Forum</option>
+            <option value="moderation">Moderation</option>
+            <option value="bug">Bug Report</option>
+          </select>
+        </label>
+        <label>Contact email (optional)
+          <input id="contactEmail" type="email" placeholder="you@email.com" />
+        </label>
+        <label>Details
+          <textarea id="contactDetails" rows="5" maxlength="1000" required placeholder="Describe the issue, steps to reproduce, and expected result."></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">Open Prefilled Support Issue</button>
+      </form>
+
       <h3>Moderation Escalation</h3>
       <p>For urgent safety or abuse issues, file a report in-platform and include the report ID when contacting support.</p>
       <h3>Response Window</h3>
-      <p>Typical response time is within 24-72 hours depending on queue volume.</p>
+      <p>Typical response time is within 24-72 hours depending on queue volume and moderation priority.</p>
     </section>
   </main>
   <footer class="footer"><p>Polly Tunnels</p><div class="footer-links"><a href="forum.html">Forum</a><a href="about.html">About</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div></footer>
@@ -34,5 +59,29 @@
   <script src="config.js?v=4"></script>
   <script src="supabase.js?v=4"></script>
   <script src="app.js?v=4"></script>
+  <script>
+    const contactIssueForm = document.querySelector('#contactIssueForm');
+    contactIssueForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const topic = String(document.querySelector('#contactTopic')?.value || 'support').trim();
+      const email = String(document.querySelector('#contactEmail')?.value || '').trim();
+      const details = String(document.querySelector('#contactDetails')?.value || '').trim();
+      if (!details) {
+        return;
+      }
+
+      const title = `[${topic}] Support request`;
+      const body = [
+        '## Contact',
+        email || 'No email provided',
+        '',
+        '## Details',
+        details
+      ].join('\n');
+
+      const url = `https://github.com/ezzp024/ezzp024.github.io/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  </script>
 </body>
 </html>

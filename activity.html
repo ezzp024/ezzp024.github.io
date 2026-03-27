@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polly Tunnels | Messages</title>
+  <title>Polly Tunnels | Activity</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,23 +16,34 @@
       <a href="account.html">Account</a>
     </nav>
   </header>
+
   <main class="account-main">
     <section class="card panel-page reveal">
-      <p class="tag">Direct Messages</p>
-      <h1>Inbox</h1>
-      <form id="messageForm" class="settings-form">
-        <label>Recipient email <input id="messageRecipient" type="email" required /></label>
-        <label>Message <textarea id="messageBody" rows="4" maxlength="600" required></textarea></label>
-        <button class="btn btn-primary" type="submit">Send</button>
-      </form>
-      <div class="session-actions">
-        <button id="refreshMessagesBtn" class="btn btn-ghost" type="button">Refresh</button>
-        <button id="markMessagesReadBtn" class="btn btn-ghost" type="button">Mark received as read</button>
+      <p class="tag">Activity</p>
+      <h1>My Threads & Likes</h1>
+      <p>Track what you posted and what you upvoted.</p>
+      <p id="authMessage" class="note" aria-live="polite">Login from the Account page to view activity.</p>
+      <div id="sessionPanel" class="session" hidden>
+        <p id="sessionText"></p>
+        <div class="session-actions">
+          <a class="btn btn-ghost" href="account.html">Account Hub</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
+        <p id="activityStats" class="note"></p>
+        <div class="list-grid">
+          <div>
+            <h3>My Threads</h3>
+            <div id="myThreads" class="mini-list"></div>
+          </div>
+          <div>
+            <h3>Liked Threads</h3>
+            <div id="likedThreads" class="mini-list"></div>
+          </div>
+        </div>
       </div>
-      <p id="messagesMessage" class="note"></p>
-      <div id="messagesList" class="mini-list"></div>
     </section>
   </main>
+
   <footer class="footer">
     <p>Polly Tunnels</p>
     <div class="footer-links">
@@ -43,10 +54,11 @@
       <a href="terms.html">Terms</a>
     </div>
   </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js?v=4"></script>
   <script src="supabase.js?v=4"></script>
   <script src="app.js?v=4"></script>
-  <script src="messages.js?v=2"></script>
+  <script src="account.js?v=7"></script>
 </body>
 </html>

@@ -2,12 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=account.html#profile" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting to Profile</title>
+  <title>Polly Tunnels | Profile</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting to your profile...</p>
-  <script>window.location.replace('account.html#profile');</script>
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main class="account-main">
+    <section class="card panel-page reveal">
+      <p class="tag">Profile</p>
+      <h1>Edit Profile</h1>
+      <p>Manage your public identity and avatar.</p>
+      <p id="authMessage" class="note" aria-live="polite">Login from the Account page to edit your profile.</p>
+      <div id="sessionPanel" class="session" hidden>
+        <p id="sessionText"></p>
+        <div class="session-actions">
+          <a class="btn btn-ghost" href="account.html">Account Hub</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
+        <div class="profile-avatar-row">
+          <img id="profileAvatar" class="profile-avatar" alt="Profile avatar" />
+          <form id="avatarForm" class="settings-form">
+            <label>Upload avatar <input id="avatarInput" type="file" accept="image/*" /></label>
+            <button class="btn btn-ghost" type="submit">Upload Avatar</button>
+          </form>
+        </div>
+        <form id="profileForm" class="settings-form">
+          <label>Display name <input id="profileName" name="display_name" required maxlength="40" /></label>
+          <label>Email <input id="profileEmail" type="email" disabled /></label>
+          <button class="btn btn-primary" type="submit">Save Profile</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels</p>
+    <div class="footer-links">
+      <a href="forum.html">Forum</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="account.js?v=7"></script>
 </body>
 </html>

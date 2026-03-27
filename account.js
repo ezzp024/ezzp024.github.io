@@ -23,11 +23,6 @@ const passwordForm = document.querySelector('#passwordForm');
 const newPassword = document.querySelector('#newPassword');
 const confirmPassword = document.querySelector('#confirmPassword');
 const linkGoogleBtn = document.querySelector('#linkGoogleBtn');
-const uiPrefsForm = document.querySelector('#uiPrefsForm');
-const compactLayout = document.querySelector('#compactLayout');
-const reduceMotion = document.querySelector('#reduceMotion');
-const hideSocial = document.querySelector('#hideSocial');
-const defaultFeedSort = document.querySelector('#defaultFeedSort');
 
 const followForm = document.querySelector('#followForm');
 const followEmail = document.querySelector('#followEmail');
@@ -37,33 +32,17 @@ const followersList = document.querySelector('#followersList');
 const activityStats = document.querySelector('#activityStats');
 const myThreads = document.querySelector('#myThreads');
 const likedThreads = document.querySelector('#likedThreads');
-const notificationsList = document.querySelector('#notificationsList');
-const refreshNotificationsBtn = document.querySelector('#refreshNotificationsBtn');
-const markReadBtn = document.querySelector('#markReadBtn');
-const messageForm = document.querySelector('#messageForm');
-const messageRecipient = document.querySelector('#messageRecipient');
-const messageBody = document.querySelector('#messageBody');
-const refreshMessagesBtn = document.querySelector('#refreshMessagesBtn');
-const markMessagesReadBtn = document.querySelector('#markMessagesReadBtn');
-const messagesList = document.querySelector('#messagesList');
-const moderationInfo = document.querySelector('#moderationInfo');
-const myReports = document.querySelector('#myReports');
-const refreshReportsBtn = document.querySelector('#refreshReportsBtn');
-const adminReportsWrap = document.querySelector('#adminReportsWrap');
-const adminReports = document.querySelector('#adminReports');
-const manageBillingBtn = document.querySelector('#manageBillingBtn');
-const billingForm = document.querySelector('#billingForm');
-const cardLast4 = document.querySelector('#cardLast4');
-const cardMask = document.querySelector('#cardMask');
-const planName = document.querySelector('#planName');
-const planStatus = document.querySelector('#planStatus');
-const linkGithubBtn = document.querySelector('#linkGithubBtn');
-const linkDiscordBtn = document.querySelector('#linkDiscordBtn');
 
 const authTabs = document.querySelectorAll('.auth-tab');
 const authForms = document.querySelectorAll('.auth-form');
 const accountTabs = document.querySelectorAll('.account-tab');
 const accountPanels = document.querySelectorAll('.account-panel');
+
+const uiPrefsForm = document.querySelector('#uiPrefsForm');
+const compactLayout = document.querySelector('#compactLayout');
+const reduceMotion = document.querySelector('#reduceMotion');
+const hideSocial = document.querySelector('#hideSocial');
+const defaultFeedSort = document.querySelector('#defaultFeedSort');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
 const UI_PREFS_KEY = 'polly_ui_prefs';
@@ -114,13 +93,13 @@ const setAuthForm = (tabName) => {
 };
 
 const setAccountPanel = (panelName) => {
+  if (accountTabs.length === 0 || accountPanels.length === 0) {
+    return;
+  }
+
   const target = panelName || 'profile';
-  accountTabs.forEach((item) => {
-    item.classList.toggle('active', item.dataset.panel === target);
-  });
-  accountPanels.forEach((panel) => {
-    panel.classList.toggle('active', panel.dataset.panel === target);
-  });
+  accountTabs.forEach((item) => item.classList.toggle('active', item.dataset.panel === target));
+  accountPanels.forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === target));
 
   if (window.location.hash !== `#${target}`) {
     window.history.replaceState({}, '', `#${target}`);
@@ -140,20 +119,21 @@ const setUiForLoggedState = (loggedIn) => {
   if (sessionPanel) {
     sessionPanel.hidden = !loggedIn;
   }
+
   if (!loggedIn) {
     setAuthForm('register');
     if (accountHeading) {
       accountHeading.textContent = 'Register or Login';
     }
     if (accountSub) {
-      accountSub.textContent = 'Secure sign-in, email verification, and approval workflow for trusted members.';
+      accountSub.textContent = 'Secure sign-in, profile controls, and community settings in one place.';
     }
   } else {
     if (accountHeading) {
       accountHeading.textContent = 'My Account';
     }
     if (accountSub) {
-      accountSub.textContent = 'Manage your profile, settings, network, and activity.';
+      accountSub.textContent = 'Manage your profile, settings, social graph, and activity.';
     }
   }
 };
@@ -178,23 +158,11 @@ const writeUiPrefs = (value) => {
 };
 
 const hydrateUiPrefsForm = () => {
-  if (!uiPrefsForm) {
-    return;
-  }
-
   const prefs = readUiPrefs();
-  if (compactLayout) {
-    compactLayout.checked = Boolean(prefs.compactLayout);
-  }
-  if (reduceMotion) {
-    reduceMotion.checked = Boolean(prefs.reduceMotion);
-  }
-  if (hideSocial) {
-    hideSocial.checked = Boolean(prefs.hideSocial);
-  }
-  if (defaultFeedSort) {
-    defaultFeedSort.value = prefs.defaultFeedSort === 'new' ? 'new' : 'hot';
-  }
+  if (compactLayout) compactLayout.checked = Boolean(prefs.compactLayout);
+  if (reduceMotion) reduceMotion.checked = Boolean(prefs.reduceMotion);
+  if (hideSocial) hideSocial.checked = Boolean(prefs.hideSocial);
+  if (defaultFeedSort) defaultFeedSort.value = prefs.defaultFeedSort === 'new' ? 'new' : 'hot';
 };
 
 const ensureProfile = async (user, fallbackName = '') => {
@@ -205,7 +173,6 @@ const ensureProfile = async (user, fallbackName = '') => {
   const { error } = await sb
     .from('profiles')
     .upsert({ id: user.id, email, display_name: displayName }, { onConflict: 'id' });
-
   if (error) {
     throw error;
   }
@@ -238,134 +205,8 @@ const renderAvatar = (url, displayName) => {
   profileAvatar.src = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%230b2948'/><text x='50%' y='55%' text-anchor='middle' font-family='Arial' font-size='52' fill='%2383ffd8'>${initial}</text></svg>`;
 };
 
-const loadNotifications = async (userId) => {
-  if (!notificationsList) {
-    return;
-  }
-
-  const { data, error } = await sb
-    .from('notifications')
-    .select('id,kind,message,is_read,created_at,thread_id')
-    .eq('recipient_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(40);
-
-  if (error) {
-    notificationsList.innerHTML = '<p class="note">Notifications setup pending. Run SUPABASE_SETUP.sql again.</p>';
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    notificationsList.innerHTML = '<p class="note">No notifications yet.</p>';
-    return;
-  }
-
-  notificationsList.innerHTML = data
-    .map((item) => {
-      const unread = item.is_read ? '' : ' unread';
-      const action = item.thread_id ? `<a class="control-btn" href="forum.html?t=${item.thread_id}">Open</a>` : '';
-      const text = item.message || item.kind;
-      return `<div class="mini-item${unread}"><span>${text} - ${new Date(item.created_at).toLocaleString()}</span>${action}</div>`;
-    })
-    .join('');
-};
-
-const loadMessages = async (userId) => {
-  if (!messagesList) {
-    return;
-  }
-
-  const { data, error } = await sb
-    .from('direct_messages')
-    .select('id,sender_id,recipient_id,body,is_read,created_at,sender_name,recipient_name')
-    .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-    .order('created_at', { ascending: false })
-    .limit(60);
-
-  if (error) {
-    messagesList.innerHTML = '<p class="note">Messages setup pending. Run SUPABASE_SETUP.sql.</p>';
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    messagesList.innerHTML = '<p class="note">No messages yet.</p>';
-    return;
-  }
-
-  messagesList.innerHTML = data
-    .map((item) => {
-      const incoming = item.recipient_id === userId;
-      const unread = incoming && !item.is_read ? ' unread' : '';
-      const peer = incoming ? item.sender_name || 'Member' : item.recipient_name || 'Member';
-      const direction = incoming ? 'From' : 'To';
-      return `<div class="mini-item${unread}"><span>${direction} ${peer}: ${item.body} - ${new Date(item.created_at).toLocaleString()}</span></div>`;
-    })
-    .join('');
-};
-
-const loadReports = async (userId, isAdmin) => {
-  if (!myReports) {
-    return;
-  }
-
-  const { data, error } = await sb
-    .from('reports')
-    .select('id,kind,target_type,target_id,reason,status,created_at')
-    .eq('reporter_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    myReports.innerHTML = '<p class="note">Reports setup pending. Run SUPABASE_SETUP.sql.</p>';
-  } else {
-    myReports.innerHTML =
-      !data || data.length === 0
-        ? '<p class="note">No reports filed yet.</p>'
-        : data
-            .map(
-              (item) =>
-                `<div class="mini-item"><span>${item.target_type} #${item.target_id} | ${item.kind} | ${item.status} | ${new Date(item.created_at).toLocaleString()}</span></div>`
-            )
-            .join('');
-  }
-
-  if (!adminReportsWrap || !adminReports) {
-    return;
-  }
-
-  if (!isAdmin) {
-    adminReportsWrap.hidden = true;
-    return;
-  }
-
-  adminReportsWrap.hidden = false;
-  const { data: queue, error: queueError } = await sb
-    .from('reports')
-    .select('id,target_type,target_id,reason,status,created_at')
-    .eq('status', 'open')
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  if (queueError) {
-    adminReports.innerHTML = `<p class="note">${queueError.message}</p>`;
-    return;
-  }
-
-  adminReports.innerHTML =
-    !queue || queue.length === 0
-      ? '<p class="note">No open reports.</p>'
-      : queue
-          .map(
-            (item) =>
-              `<div class="mini-item"><span>${item.target_type} #${item.target_id} - ${item.reason}</span><button class="control-btn" data-resolve-report="${item.id}" type="button">Resolve</button></div>`
-          )
-          .join('');
-};
-
 const loadNetwork = async (userId) => {
-  if (!networkStats) {
-    return;
-  }
+  if (!networkStats) return;
 
   const { data: followingRows, error: followingError } = await sb
     .from('follows')
@@ -373,29 +214,23 @@ const loadNetwork = async (userId) => {
     .eq('follower_id', userId);
 
   if (followingError) {
-    networkStats.textContent = 'Network tables not ready yet. Run SUPABASE_SETUP.sql again.';
+    networkStats.textContent = 'Network setup pending. Run SUPABASE_SETUP.sql again.';
     return;
   }
 
   const { data: followerRows } = await sb.from('follows').select('follower_id').eq('following_id', userId);
-
-  const followingIds = (followingRows || []).map((item) => item.following_id);
-  const followerIds = (followerRows || []).map((item) => item.follower_id);
+  const followingIds = (followingRows || []).map((i) => i.following_id);
+  const followerIds = (followerRows || []).map((i) => i.follower_id);
 
   const [followingProfiles, followerProfiles] = await Promise.all([
-    followingIds.length
-      ? sb.from('profiles').select('id,display_name,email').in('id', followingIds)
-      : Promise.resolve({ data: [] }),
-    followerIds.length
-      ? sb.from('profiles').select('id,display_name,email').in('id', followerIds)
-      : Promise.resolve({ data: [] })
+    followingIds.length ? sb.from('profiles').select('id,display_name,email').in('id', followingIds) : Promise.resolve({ data: [] }),
+    followerIds.length ? sb.from('profiles').select('id,display_name,email').in('id', followerIds) : Promise.resolve({ data: [] })
   ]);
 
   const followingData = followingProfiles.data || [];
   const followerData = followerProfiles.data || [];
   const followerSet = new Set(followerData.map((item) => item.id));
   const friendsCount = followingData.filter((item) => followerSet.has(item.id)).length;
-
   networkStats.textContent = `${followingData.length} following | ${followerData.length} followers | ${friendsCount} friends`;
 
   if (followingList) {
@@ -414,34 +249,25 @@ const loadNetwork = async (userId) => {
     followersList.innerHTML =
       followerData.length === 0
         ? '<p class="note">No followers yet.</p>'
-        : followerData
-            .map((person) => `<div class="mini-item"><span>${person.display_name} (${person.email})</span></div>`)
-            .join('');
+        : followerData.map((person) => `<div class="mini-item"><span>${person.display_name} (${person.email})</span></div>`).join('');
   }
 };
 
 const loadActivity = async (userId) => {
-  if (!activityStats) {
-    return;
-  }
+  if (!activityStats) return;
 
   const { data: threadRows } = await sb
     .from('threads')
     .select('id,title,created_at')
     .eq('author_id', userId)
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(12);
 
-  const { data: upvoteRows } = await sb.from('thread_upvotes').select('thread_id').eq('user_id', userId).limit(10);
-  const likedIds = (upvoteRows || []).map((item) => item.thread_id);
-
+  const { data: upvoteRows } = await sb.from('thread_upvotes').select('thread_id').eq('user_id', userId).limit(12);
+  const likedIds = (upvoteRows || []).map((i) => i.thread_id);
   const likedRows = likedIds.length
     ? (
-        await sb
-          .from('threads')
-          .select('id,title,created_at')
-          .in('id', likedIds)
-          .order('created_at', { ascending: false })
+        await sb.from('threads').select('id,title,created_at').in('id', likedIds).order('created_at', { ascending: false })
       ).data || []
     : [];
 
@@ -451,9 +277,7 @@ const loadActivity = async (userId) => {
     myThreads.innerHTML =
       !threadRows || threadRows.length === 0
         ? '<p class="note">No threads posted yet.</p>'
-        : threadRows
-            .map((thread) => `<a class="mini-item" href="forum.html?t=${thread.id}">${thread.title}</a>`)
-            .join('');
+        : threadRows.map((thread) => `<a class="mini-item" href="forum.html?t=${thread.id}">${thread.title}</a>`).join('');
   }
 
   if (likedThreads) {
@@ -466,7 +290,6 @@ const loadActivity = async (userId) => {
 
 const renderSession = async () => {
   if (!guardSupabase()) {
-    // Keep guest auth hidden to avoid showing register/login by mistake.
     return;
   }
 
@@ -482,7 +305,6 @@ const renderSession = async () => {
     return;
   }
 
-  // If we have a session, never show register/login UI.
   setUiForLoggedState(true);
 
   try {
@@ -493,28 +315,14 @@ const renderSession = async () => {
     if (sessionText) {
       sessionText.textContent = `Logged in as ${profile.display_name} (${profile.email})${profile.is_admin ? ' | Admin' : ''}${profile.approved ? '' : ' | Pending approval'}`;
     }
-    if (profileName) {
-      profileName.value = profile.display_name || '';
-    }
-    if (profileEmail) {
-      profileEmail.value = profile.email || '';
-    }
+    if (profileName) profileName.value = profile.display_name || '';
+    if (profileEmail) profileEmail.value = profile.email || '';
     renderAvatar(profile.avatar_url, profile.display_name);
 
     await Promise.all([loadNetwork(session.user.id), loadActivity(session.user.id)]);
     hydrateUiPrefsForm();
   } catch (error) {
-    // Keep account view visible even if profile/network queries fail.
-    if (sessionText) {
-      sessionText.textContent = `Logged in as ${session.user.email || 'member'} | Profile sync issue`;
-    }
-    if (networkStats) {
-      networkStats.textContent = 'Profile data is still syncing. Try refresh in a moment.';
-    }
-    if (activityStats) {
-      activityStats.textContent = 'Activity data will appear after profile sync.';
-    }
-    setMessage(error.message || 'Could not fully load account data yet.', true);
+    setMessage(error.message || 'Could not load account data.', true);
   }
 };
 
@@ -534,9 +342,7 @@ accountTabs.forEach((tab) => {
 
 if (sendCodeBtn && registerForm) {
   sendCodeBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const data = new FormData(registerForm);
     const name = String(data.get('name') || '').trim();
@@ -566,9 +372,7 @@ if (sendCodeBtn && registerForm) {
 if (registerForm) {
   registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const data = new FormData(registerForm);
     const email = String(data.get('email') || '').trim().toLowerCase();
@@ -605,9 +409,7 @@ if (registerForm) {
 if (loginForm) {
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const data = new FormData(loginForm);
     const email = String(data.get('email') || '').trim().toLowerCase();
@@ -637,9 +439,7 @@ if (googleBtn) {
   googleBtn.innerHTML = '<button class="btn btn-google" type="button">Continue with Google</button>';
   const button = googleBtn.querySelector('button');
   button?.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
@@ -655,9 +455,7 @@ if (googleBtn) {
 if (profileForm) {
   profileForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const {
       data: { session }
@@ -687,9 +485,7 @@ if (profileForm) {
 if (avatarForm) {
   avatarForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const {
       data: { session }
@@ -707,7 +503,6 @@ if (avatarForm) {
 
     const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '');
     const path = `${session.user.id}/${Date.now()}-${cleanName}`;
-
     const { error: uploadError } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
     if (uploadError) {
       setMessage(uploadError.message, true);
@@ -716,12 +511,7 @@ if (avatarForm) {
 
     const { data: publicUrlData } = sb.storage.from('avatars').getPublicUrl(path);
     const avatarUrl = publicUrlData?.publicUrl || '';
-
-    const { error: profileError } = await sb
-      .from('profiles')
-      .update({ avatar_url: avatarUrl })
-      .eq('id', session.user.id);
-
+    const { error: profileError } = await sb.from('profiles').update({ avatar_url: avatarUrl }).eq('id', session.user.id);
     if (profileError) {
       setMessage(profileError.message, true);
       return;
@@ -735,9 +525,7 @@ if (avatarForm) {
 if (passwordForm) {
   passwordForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const password = String(newPassword?.value || '');
     const confirm = String(confirmPassword?.value || '');
@@ -763,9 +551,7 @@ if (passwordForm) {
 
 if (linkGoogleBtn) {
   linkGoogleBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     if (typeof sb.auth.linkIdentity !== 'function') {
       setMessage('Google linking not available in this session.', true);
@@ -783,51 +569,6 @@ if (linkGoogleBtn) {
   });
 }
 
-if (linkGithubBtn) {
-  linkGithubBtn.addEventListener('click', () => {
-    setMessage('GitHub linking will be enabled in the next update.');
-  });
-}
-
-if (linkDiscordBtn) {
-  linkDiscordBtn.addEventListener('click', () => {
-    setMessage('Discord linking will be enabled in the next update.');
-  });
-}
-
-if (billingForm) {
-  billingForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
-
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      setMessage('Please login first.', true);
-      return;
-    }
-
-    const last4 = String(cardLast4?.value || '').trim();
-    if (!/^\d{4}$/.test(last4)) {
-      setMessage('Enter exactly 4 digits for card last 4.', true);
-      return;
-    }
-
-    const map = readBillingMap();
-    map[session.user.id] = {
-      plan: 'Starter',
-      status: 'Free community access',
-      last4
-    };
-    writeBillingMap(map);
-    renderBilling(session.user.id);
-    setMessage('Payment method saved.');
-  });
-}
-
 if (uiPrefsForm) {
   uiPrefsForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -837,24 +578,15 @@ if (uiPrefsForm) {
       hideSocial: Boolean(hideSocial?.checked),
       defaultFeedSort: defaultFeedSort?.value === 'new' ? 'new' : 'hot'
     };
-
     writeUiPrefs(prefs);
     setMessage('Interface preferences saved.');
-  });
-}
-
-if (manageBillingBtn) {
-  manageBillingBtn.addEventListener('click', () => {
-    setMessage('Billing portal integration can be added next (Stripe).');
   });
 }
 
 if (followForm) {
   followForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
+    if (!guardSupabase()) return;
 
     const {
       data: { session }
@@ -911,9 +643,7 @@ if (followForm) {
 if (followingList) {
   followingList.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-unfollow-id]');
-    if (!button || !guardSupabase()) {
-      return;
-    }
+    if (!button || !guardSupabase()) return;
 
     const {
       data: { session }
@@ -924,9 +654,7 @@ if (followingList) {
     }
 
     const targetId = button.getAttribute('data-unfollow-id');
-    if (!targetId) {
-      return;
-    }
+    if (!targetId) return;
 
     const { error } = await sb
       .from('follows')
@@ -944,216 +672,9 @@ if (followingList) {
   });
 }
 
-if (markReadBtn) {
-  markReadBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-
-    await sb.from('notifications').update({ is_read: true }).eq('recipient_id', session.user.id);
-    await loadNotifications(session.user.id);
-    setMessage('Notifications marked as read.');
-  });
-}
-
-if (messageForm) {
-  messageForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!guardSupabase()) {
-      return;
-    }
-
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      setMessage('Please login first.', true);
-      return;
-    }
-
-    const toEmail = String(messageRecipient?.value || '').trim().toLowerCase();
-    const body = String(messageBody?.value || '').trim();
-    if (!toEmail || !body) {
-      setMessage('Add recipient and message body.', true);
-      return;
-    }
-
-    if (toEmail === String(session.user.email || '').toLowerCase()) {
-      setMessage('You cannot message yourself.', true);
-      return;
-    }
-
-    const { data: senderProfile } = await sb
-      .from('profiles')
-      .select('id,display_name')
-      .eq('id', session.user.id)
-      .single();
-
-    const { data: targetProfile, error: targetError } = await sb
-      .from('profiles')
-      .select('id,display_name')
-      .eq('email', toEmail)
-      .single();
-
-    if (targetError || !targetProfile) {
-      setMessage('Recipient not found.', true);
-      return;
-    }
-
-    const { error } = await sb.from('direct_messages').insert({
-      sender_id: session.user.id,
-      recipient_id: targetProfile.id,
-      sender_name: senderProfile?.display_name || session.user.email,
-      recipient_name: targetProfile.display_name,
-      body
-    });
-
-    if (error) {
-      setMessage(error.message, true);
-      return;
-    }
-
-    await sb.from('notifications').insert({
-      recipient_id: targetProfile.id,
-      actor_id: session.user.id,
-      kind: 'message',
-      message: `${senderProfile?.display_name || session.user.email} sent you a message.`
-    });
-
-    messageForm.reset();
-    setMessage('Message sent.');
-    await loadMessages(session.user.id);
-    await loadNotifications(session.user.id);
-  });
-}
-
-if (refreshMessagesBtn) {
-  refreshMessagesBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-    await loadMessages(session.user.id);
-    setMessage('Messages refreshed.');
-  });
-}
-
-if (markMessagesReadBtn) {
-  markMessagesReadBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-
-    await sb
-      .from('direct_messages')
-      .update({ is_read: true })
-      .eq('recipient_id', session.user.id)
-      .eq('is_read', false);
-
-    await loadMessages(session.user.id);
-    setMessage('Received messages marked as read.');
-  });
-}
-
-if (refreshReportsBtn) {
-  refreshReportsBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-    const profile = await getProfile(session.user.id);
-    await loadReports(session.user.id, Boolean(profile.is_admin));
-    setMessage('Reports refreshed.');
-  });
-}
-
-if (adminReports) {
-  adminReports.addEventListener('click', async (event) => {
-    const btn = event.target.closest('button[data-resolve-report]');
-    if (!btn || !guardSupabase()) {
-      return;
-    }
-
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-
-    const profile = await getProfile(session.user.id);
-    if (!profile.is_admin) {
-      setMessage('Admin only action.', true);
-      return;
-    }
-
-    const reportId = Number(btn.getAttribute('data-resolve-report'));
-    if (!reportId) {
-      return;
-    }
-
-    const { error } = await sb
-      .from('reports')
-      .update({ status: 'resolved', resolved_by: session.user.id, resolved_at: new Date().toISOString() })
-      .eq('id', reportId);
-
-    if (error) {
-      setMessage(error.message, true);
-      return;
-    }
-
-    await loadReports(session.user.id, true);
-    setMessage('Report resolved.');
-  });
-}
-
-if (refreshNotificationsBtn) {
-  refreshNotificationsBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-
-    const {
-      data: { session }
-    } = await sb.auth.getSession();
-    if (!session?.user) {
-      return;
-    }
-
-    await loadNotifications(session.user.id);
-    setMessage('Notifications refreshed.');
-  });
-}
-
 if (logoutBtn) {
   logoutBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) {
-      return;
-    }
-
+    if (!guardSupabase()) return;
     await sb.auth.signOut();
     setMessage('Logged out.');
     await renderSession();
@@ -1166,6 +687,5 @@ if (sb?.auth?.onAuthStateChange) {
   });
 }
 
-// Prevent auth UI flicker on navigation/refresh.
 setUiForLoggedState(true);
 renderSession();

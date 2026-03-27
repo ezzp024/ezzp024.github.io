@@ -163,6 +163,15 @@ const getThreads = async () => {
 
 const updateSidePanels = async () => {
   if (categoryStats) {
+    if (allThreads.length === 0) {
+      categoryStats.innerHTML = [
+        '<li><span>#</span>general (start your first architecture thread)</li>',
+        '<li><span>#</span>debug (post logs and reproduction steps)</li>',
+        '<li><span>#</span>api (share contracts and edge cases)</li>',
+        '<li><span>#</span>frontend (ship UI and accessibility fixes)</li>',
+        '<li><span>#</span>automation (workflows, scripts, CI)</li>'
+      ].join('');
+    } else {
     const counts = new Map();
     allThreads.forEach((thread) => {
       const key = thread.category || 'general';
@@ -173,6 +182,7 @@ const updateSidePanels = async () => {
     categoryStats.innerHTML = categories
       .map((cat) => `<li><span>#</span>${cat} (${counts.get(cat) || 0})</li>`)
       .join('');
+    }
   }
 
   if (recentMembers) {
@@ -192,7 +202,7 @@ const updateSidePanels = async () => {
     const recentThreads = allThreads.slice(0, 4);
     liveActivity.innerHTML =
       recentThreads.length === 0
-        ? '<li>No activity yet. Be first to post.</li>'
+        ? '<li>Launch window: no posts yet. Start the first thread and set the tone.</li>'
         : recentThreads
             .map((thread) => `<li><strong>${escapeHtml(thread.author_name)}</strong> posted <a class="author-link" href="forum.html?t=${thread.id}">${escapeHtml(thread.title)}</a></li>`)
             .join('');
@@ -227,7 +237,7 @@ const renderThreads = async () => {
   if (threads.length === 0) {
     threadFeed.innerHTML =
       allThreads.length === 0
-        ? '<div class="empty-state"><h3>No threads yet</h3><p>Start the first conversation for this category.</p><a class="btn btn-primary" href="account.html">Create your account</a></div>'
+        ? '<div class="empty-state"><h3>Community is live, waiting on first posts</h3><p>Open a thread with context, expected behavior, and what you already tried.</p><div class="session-actions"><a class="btn btn-primary" href="account.html">Create account</a><a class="btn btn-ghost" href="https://github.com/ezzp024/ezzp024.github.io/issues/new" target="_blank" rel="noopener noreferrer">Submit issue</a></div></div>'
         : '<p class="note">No threads match your current filters.</p>';
     await updateSidePanels();
     return;
@@ -269,7 +279,7 @@ const renderThreads = async () => {
       <div class="thread-controls">
         <button class="control-btn" data-action="upvote" data-thread-id="${thread.id}">${thread.user_upvoted ? 'Upvoted' : 'Upvote'} (${thread.upvote_count})</button>
         <button class="control-btn" data-action="collapse" data-thread-id="${thread.id}">Collapse</button>
-        <a class="control-btn" href="account.html?to=${encodeURIComponent(thread.author_email || '')}#messages">Message</a>
+        <a class="control-btn" href="messages.html?to=${encodeURIComponent(thread.author_email || '')}">Message</a>
         <button class="control-btn" data-action="report" data-thread-id="${thread.id}">Report</button>
       </div>
       <section class="replies" data-replies-id="${thread.id}">

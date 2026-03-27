@@ -2,12 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=account.html#network" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting to Network</title>
+  <title>Polly Tunnels | Network</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting to your network...</p>
-  <script>window.location.replace('account.html#network');</script>
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main class="account-main">
+    <section class="card panel-page reveal">
+      <p class="tag">Network</p>
+      <h1>Friends & Followers</h1>
+      <p>Follow members and build a trusted graph.</p>
+      <p id="authMessage" class="note" aria-live="polite">Login from the Account page to access your network.</p>
+      <div id="sessionPanel" class="session" hidden>
+        <p id="sessionText"></p>
+        <div class="session-actions">
+          <a class="btn btn-ghost" href="account.html">Account Hub</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
+        <p id="networkStats" class="note"></p>
+        <form id="followForm" class="settings-form">
+          <label>Find user by email <input id="followEmail" type="email" placeholder="friend@email.com" /></label>
+          <button class="btn btn-primary" type="submit">Follow User</button>
+        </form>
+        <div class="list-grid">
+          <div>
+            <h3>Following</h3>
+            <div id="followingList" class="mini-list"></div>
+          </div>
+          <div>
+            <h3>Followers</h3>
+            <div id="followersList" class="mini-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels</p>
+    <div class="footer-links">
+      <a href="forum.html">Forum</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="account.js?v=7"></script>
 </body>
 </html>

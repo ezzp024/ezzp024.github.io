@@ -54,6 +54,16 @@ const load = async () => {
           .join('');
 };
 
+const prefillRecipient = () => {
+  if (!recipient) {
+    return;
+  }
+  const value = String(new URLSearchParams(window.location.search).get('to') || '').trim();
+  if (value) {
+    recipient.value = value;
+  }
+};
+
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!sb) {
@@ -124,3 +134,4 @@ markReadBtn?.addEventListener('click', async () => {
 });
 
 load();
+prefillRecipient();

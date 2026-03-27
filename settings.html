@@ -2,12 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=account.html#settings" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting to Settings</title>
+  <title>Polly Tunnels | Settings</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting to your settings...</p>
-  <script>window.location.replace('account.html#settings');</script>
+  <header class="topbar" id="top">
+    <a class="logo" href="index.html">Polly Tunnels</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+    <nav class="topnav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="forum.html">Forum</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main class="account-main">
+    <section class="card panel-page reveal">
+      <p class="tag">Settings</p>
+      <h1>Security & Preferences</h1>
+      <p>Update password, linked providers, and UI defaults.</p>
+      <p id="authMessage" class="note" aria-live="polite">Login from the Account page to update settings.</p>
+      <div id="sessionPanel" class="session" hidden>
+        <p id="sessionText"></p>
+        <div class="session-actions">
+          <a class="btn btn-ghost" href="account.html">Account Hub</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+        </div>
+
+        <h3>Security</h3>
+        <form id="passwordForm" class="settings-form">
+          <label>New password <input id="newPassword" type="password" minlength="6" required placeholder="At least 6 characters" /></label>
+          <label>Confirm password <input id="confirmPassword" type="password" minlength="6" required placeholder="Repeat new password" /></label>
+          <button class="btn btn-primary" type="submit">Change Password</button>
+        </form>
+        <div class="settings-form">
+          <button id="linkGoogleBtn" class="btn btn-ghost" type="button">Link Google Account</button>
+        </div>
+
+        <h3>Interface</h3>
+        <form id="uiPrefsForm" class="settings-form">
+          <label class="inline-check"><input id="compactLayout" type="checkbox" /> Compact layout</label>
+          <label class="inline-check"><input id="reduceMotion" type="checkbox" /> Reduce motion effects</label>
+          <label class="inline-check"><input id="hideSocial" type="checkbox" /> Hide social blocks</label>
+          <label>
+            Default feed sort
+            <select id="defaultFeedSort">
+              <option value="hot">Hot</option>
+              <option value="new">New</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" type="submit">Save Interface Preferences</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Polly Tunnels</p>
+    <div class="footer-links">
+      <a href="forum.html">Forum</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabase.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="account.js?v=7"></script>
 </body>
 </html>
