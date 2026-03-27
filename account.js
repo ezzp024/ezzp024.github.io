@@ -45,7 +45,7 @@ const hideSocial = document.querySelector('#hideSocial');
 const defaultFeedSort = document.querySelector('#defaultFeedSort');
 
 const REG_DRAFT_KEY = 'polly_reg_draft';
-const UI_PREFS_KEY = 'polly_ui_prefs';
+const ACCOUNT_UI_PREFS_KEY = 'polly_ui_prefs';
 
 const setMessage = (message, isError = false) => {
   if (!authMessage) {
@@ -150,7 +150,7 @@ const readUiPrefs = () => {
     return window.getUiPrefs();
   }
   try {
-    const raw = localStorage.getItem(UI_PREFS_KEY);
+    const raw = localStorage.getItem(ACCOUNT_UI_PREFS_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -158,7 +158,7 @@ const readUiPrefs = () => {
 };
 
 const writeUiPrefs = (value) => {
-  localStorage.setItem(UI_PREFS_KEY, JSON.stringify(value));
+  localStorage.setItem(ACCOUNT_UI_PREFS_KEY, JSON.stringify(value));
   if (typeof window.applyUiPrefs === 'function') {
     window.applyUiPrefs();
   }
