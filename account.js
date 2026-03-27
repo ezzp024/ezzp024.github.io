@@ -87,6 +87,42 @@ const getAccountRedirectUrl = () => {
   return url.toString();
 };
 
+const startGoogleLogin = async () => {
+  setMessage('Starting Google sign-in...');
+
+  if (!guardSupabase()) {
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: getAccountRedirectUrl() }
+    });
+
+    if (error) {
+      setMessage(error.message, true);
+      return;
+    }
+
+    if (data?.url) {
+      window.location.assign(data.url);
+      return;
+    }
+
+    const base = String(window.SUPABASE_URL || '').trim();
+    if (!base) {
+      setMessage('Supabase URL missing; cannot start Google sign-in.', true);
+      return;
+    }
+
+    const fallbackUrl = `${base}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(getAccountRedirectUrl())}`;
+    window.location.assign(fallbackUrl);
+  } catch (error) {
+    setMessage(error?.message || 'Google login failed to start.', true);
+  }
+};
+
 const showCallbackErrorFromUrl = () => {
   const searchParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -461,25 +497,7 @@ if (loginForm) {
 
 if (googleFallbackBtn) {
   googleFallbackBtn.addEventListener('click', async () => {
-    if (!guardSupabase()) return;
-
-    try {
-      const { data, error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: getAccountRedirectUrl() }
-      });
-
-      if (error) {
-        setMessage(error.message, true);
-        return;
-      }
-
-      if (data?.url) {
-        window.location.assign(data.url);
-      }
-    } catch (error) {
-      setMessage(error?.message || 'Google login failed to start.', true);
-    }
+    await startGoogleLogin();
   });
 }
 
@@ -487,25 +505,7 @@ if (googleBtn) {
   googleBtn.innerHTML = '<button class="btn btn-google" type="button">Continue with Google</button>';
   const button = googleBtn.querySelector('button');
   button?.addEventListener('click', async () => {
-    if (!guardSupabase()) return;
-
-    try {
-      const { data, error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: getAccountRedirectUrl() }
-      });
-
-      if (error) {
-        setMessage(error.message, true);
-        return;
-      }
-
-      if (data?.url) {
-        window.location.assign(data.url);
-      }
-    } catch (error) {
-      setMessage(error?.message || 'Google login failed to start.', true);
-    }
+    await startGoogleLogin();
   });
 }
 
