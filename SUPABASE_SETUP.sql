@@ -17,10 +17,13 @@ create table if not exists public.threads (
   id bigint generated always as identity primary key,
   author_id uuid not null references public.profiles(id) on delete cascade,
   author_name text not null,
+  category text not null default 'general',
   title text not null,
   body text not null,
   created_at timestamptz not null default now()
 );
+
+alter table public.threads add column if not exists category text not null default 'general';
 
 create table if not exists public.replies (
   id bigint generated always as identity primary key,

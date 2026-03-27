@@ -74,7 +74,6 @@
         <div class="account-tabs" role="tablist" aria-label="Account sections">
           <button class="account-tab active" data-panel="profile" type="button">Profile</button>
           <button class="account-tab" data-panel="settings" type="button">Settings</button>
-          <button class="account-tab" data-panel="billing" type="button">Payment</button>
           <button class="account-tab" data-panel="network" type="button">Friends</button>
           <button class="account-tab" data-panel="activity" type="button">Threads</button>
           <button class="account-tab" data-panel="notifications" type="button">Notifications</button>
@@ -107,8 +106,6 @@
           </form>
           <div class="settings-form">
             <button id="linkGoogleBtn" class="btn btn-ghost" type="button">Link Google Account</button>
-            <button id="linkGithubBtn" class="btn btn-ghost" type="button">Link GitHub (Soon)</button>
-            <button id="linkDiscordBtn" class="btn btn-ghost" type="button">Link Discord (Soon)</button>
           </div>
 
           <h3>Interface Controls</h3>
@@ -125,26 +122,6 @@
             </label>
             <button class="btn btn-primary" type="submit">Save Interface Preferences</button>
           </form>
-        </section>
-
-        <section class="profile-box account-panel" data-panel="billing">
-          <h3>Payment & Billing</h3>
-          <div class="billing-grid">
-            <article class="billing-card">
-              <p class="note">Current Plan</p>
-              <h4 id="planName">Starter</h4>
-              <p id="planStatus" class="note">Free community access</p>
-              <button id="manageBillingBtn" class="btn btn-ghost" type="button">Manage Billing</button>
-            </article>
-            <article class="billing-card">
-              <p class="note">Saved Method</p>
-              <h4 id="cardMask">No card saved</h4>
-              <form id="billingForm" class="settings-form">
-                <label>Card last 4 digits <input id="cardLast4" maxlength="4" inputmode="numeric" placeholder="1234" /></label>
-                <button class="btn btn-primary" type="submit">Save Payment Method</button>
-              </form>
-            </article>
-          </div>
         </section>
 
         <section class="profile-box account-panel" data-panel="network">
@@ -229,12 +206,6 @@
         <li>Build a trusted profile in Polly Tunnels community.</li>
       </ul>
 
-      <div class="social-stack account-social">
-        <h3>Social Presence</h3>
-        <a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="https://discord.com" target="_blank" rel="noreferrer">Discord</a>
-        <a href="https://x.com" target="_blank" rel="noreferrer">X / Updates</a>
-      </div>
     </aside>
   </main>
 

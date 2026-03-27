@@ -9,14 +9,14 @@ const messageCount = document.querySelector('#messageCount');
 const sortTabs = document.querySelectorAll('.sort-tabs .tab');
 const focusModeBtn = document.querySelector('#focusModeBtn');
 const feedSearch = document.querySelector('#feedSearch');
+const categoryFilter = document.querySelector('#categoryFilter');
 const clearSearchBtn = document.querySelector('#clearSearchBtn');
-const topicChips = document.querySelectorAll('.chip');
 
 const initialPrefs = typeof window.getUiPrefs === 'function' ? window.getUiPrefs() : {};
 let currentSort = initialPrefs.defaultFeedSort === 'new' ? 'new' : 'hot';
 let currentUser = null;
 let currentProfile = null;
-let activeTopic = 'all';
+let activeCategory = 'all';
 let allThreads = [];
 
 const threadTitleInput = threadForm?.querySelector('input[name="title"]');
@@ -86,7 +86,7 @@ const loadSession = async () => {
 const getThreads = async () => {
   const { data: threadRows, error: threadError } = await sb
     .from('threads')
-    .select('id,title,body,author_id,author_name,created_at')
+    .select('id,title,body,category,author_id,author_name,created_at')
     .order('created_at', { ascending: false });
 
   if (threadError) {
@@ -169,8 +169,8 @@ const renderThreads = async () => {
   const threads = allThreads.filter((thread) => {
     const haystack = `${thread.title} ${thread.body} ${thread.author_name}`.toLowerCase();
     const keywordMatch = !keyword || haystack.includes(keyword);
-    const topicMatch = activeTopic === 'all' || haystack.includes(activeTopic);
-    return keywordMatch && topicMatch;
+    const categoryMatch = activeCategory === 'all' || thread.category === activeCategory;
+    return keywordMatch && categoryMatch;
   });
 
   threadFeed.innerHTML = '';
@@ -221,7 +221,7 @@ const renderThreads = async () => {
           <span class="thread-meta"><a class="author-link" href="user.html?id=${encodeURIComponent(thread.author_id)}">${escapeHtml(thread.author_name)}</a> | ${formatTime(thread.created_at)}</span>
           </div>
         </div>
-        <span class="thread-meta">${thread.replies.length} replies</span>
+        <span class="thread-meta"><span class="category-pill">${escapeHtml(thread.category || 'general')}</span> ${thread.replies.length} replies</span>
       </div>
       <p>${escapeHtml(thread.body)}</p>
       <div class="thread-controls">
@@ -233,13 +233,24 @@ const renderThreads = async () => {
       <section class="replies" data-replies-id="${thread.id}">
         ${repliesHTML || '<p class="note">No replies yet.</p>'}
       </section>
-      <form class="reply-form" data-thread-id="${thread.id}">
+      <form class="reply-form" data-reply-form-id="${thread.id}" data-thread-id="${thread.id}">
         <input name="reply" maxlength="250" required placeholder="Write a reply..." />
         <button class="btn btn-ghost" type="submit">Reply</button>
       </form>
     `;
+    item.id = `thread-${thread.id}`;
     threadFeed.appendChild(item);
   });
+
+  const urlThread = Number(new URLSearchParams(window.location.search).get('t'));
+  if (urlThread) {
+    const target = document.getElementById(`thread-${urlThread}`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('thread-highlight');
+      setTimeout(() => target.classList.remove('thread-highlight'), 1800);
+    }
+  }
 };
 
 const requireApprovedUser = () => {
@@ -297,6 +308,7 @@ if (threadForm) {
     const data = new FormData(threadForm);
     const title = String(data.get('title') || '').trim();
     const body = String(data.get('body') || '').trim();
+    const category = String(data.get('category') || 'general').trim().toLowerCase();
 
     if (!title || !body) {
       setThreadMessage('Please add title and message.', true);
@@ -308,6 +320,7 @@ if (threadForm) {
       .insert({
         title,
         body,
+        category,
         author_id: currentUser.id,
         author_name: currentProfile.display_name
       })
@@ -381,11 +394,15 @@ if (threadFeed) {
 
     if (action === 'collapse') {
       const replies = threadFeed.querySelector(`[data-replies-id="${threadId}"]`);
+      const replyForm = threadFeed.querySelector(`[data-reply-form-id="${threadId}"]`);
       if (!replies) {
         return;
       }
 
       const collapsed = replies.classList.toggle('collapsed');
+      if (replyForm) {
+        replyForm.classList.toggle('collapsed', collapsed);
+      }
       button.textContent = collapsed ? 'Expand' : 'Collapse';
       return;
     }
@@ -504,6 +521,10 @@ if (feedSearch) {
 if (clearSearchBtn && feedSearch) {
   clearSearchBtn.addEventListener('click', async () => {
     feedSearch.value = '';
+    if (categoryFilter) {
+      categoryFilter.value = 'all';
+      activeCategory = 'all';
+    }
     try {
       await renderThreads();
       feedSearch.focus();
@@ -513,19 +534,16 @@ if (clearSearchBtn && feedSearch) {
   });
 }
 
-topicChips.forEach((chip) => {
-  chip.addEventListener('click', async () => {
-    topicChips.forEach((item) => item.classList.remove('active'));
-    chip.classList.add('active');
-    activeTopic = chip.dataset.topic || 'all';
-
+if (categoryFilter) {
+  categoryFilter.addEventListener('change', async () => {
+    activeCategory = categoryFilter.value || 'all';
     try {
       await renderThreads();
     } catch (error) {
       setThreadMessage(error.message, true);
     }
   });
-});
+}
 
 sortTabs.forEach((tab) => {
   tab.addEventListener('click', async () => {

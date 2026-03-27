@@ -71,21 +71,31 @@
 
         <div class="feed-tools">
           <input id="feedSearch" type="search" placeholder="Search titles, posts, and authors" />
+          <select id="categoryFilter" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+            <option value="general">General</option>
+            <option value="debug">Debug</option>
+            <option value="api">API</option>
+            <option value="frontend">Frontend</option>
+            <option value="automation">Automation</option>
+          </select>
           <button id="clearSearchBtn" class="control-btn" type="button">Clear</button>
-        </div>
-
-        <div class="topic-chips" aria-label="Quick topics">
-          <button class="chip active" data-topic="all" type="button">All</button>
-          <button class="chip" data-topic="debug" type="button">Debug</button>
-          <button class="chip" data-topic="api" type="button">API</button>
-          <button class="chip" data-topic="frontend" type="button">Frontend</button>
-          <button class="chip" data-topic="automation" type="button">Automation</button>
         </div>
 
         <form id="threadForm" class="thread-form">
           <label>
             Thread title
             <input name="title" required maxlength="90" placeholder="What are you building today?" />
+          </label>
+          <label>
+            Category
+            <select id="threadCategory" name="category" required>
+              <option value="general">General</option>
+              <option value="debug">Debug</option>
+              <option value="api">API</option>
+              <option value="frontend">Frontend</option>
+              <option value="automation">Automation</option>
+            </select>
           </label>
           <label>
             Your message
@@ -108,12 +118,6 @@
           <li>4) Collapse long threads for easier reading</li>
         </ul>
         <a class="btn btn-ghost side-btn" href="account.html">Open Account</a>
-        <div class="social-stack">
-          <h3>Social</h3>
-          <a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://discord.com" target="_blank" rel="noreferrer">Discord</a>
-          <a href="https://x.com" target="_blank" rel="noreferrer">X / Updates</a>
-        </div>
       </aside>
     </section>
   </main>

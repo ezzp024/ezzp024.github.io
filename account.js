@@ -130,7 +130,7 @@ const setAccountPanel = (panelName) => {
 
 const getPanelFromHash = () => {
   const value = window.location.hash.replace('#', '').trim();
-  const valid = new Set(['profile', 'settings', 'billing', 'network', 'activity', 'notifications', 'messages', 'moderation']);
+  const valid = new Set(['profile', 'settings', 'network', 'activity', 'notifications', 'messages', 'moderation']);
   return valid.has(value) ? value : 'profile';
 };
 
@@ -154,7 +154,7 @@ const setUiForLoggedState = (loggedIn) => {
       accountHeading.textContent = 'My Account';
     }
     if (accountSub) {
-      accountSub.textContent = 'Manage your profile, settings, payment, social graph, and activity.';
+      accountSub.textContent = 'Manage your profile, settings, social graph, messaging, and activity.';
     }
   }
 };
@@ -295,7 +295,7 @@ const loadNotifications = async (userId) => {
   notificationsList.innerHTML = data
     .map((item) => {
       const unread = item.is_read ? '' : ' unread';
-      const action = item.thread_id ? '<a class="control-btn" href="forum.html">Open</a>' : '';
+      const action = item.thread_id ? `<a class="control-btn" href="forum.html?t=${item.thread_id}">Open</a>` : '';
       const text = item.message || item.kind;
       return `<div class="mini-item${unread}"><span>${text} - ${new Date(item.created_at).toLocaleString()}</span>${action}</div>`;
     })
@@ -484,7 +484,7 @@ const loadActivity = async (userId) => {
       !threadRows || threadRows.length === 0
         ? '<p class="note">No threads posted yet.</p>'
         : threadRows
-            .map((thread) => `<a class="mini-item" href="forum.html">${thread.title}</a>`)
+            .map((thread) => `<a class="mini-item" href="forum.html?t=${thread.id}">${thread.title}</a>`)
             .join('');
   }
 
@@ -492,7 +492,7 @@ const loadActivity = async (userId) => {
     likedThreads.innerHTML =
       likedRows.length === 0
         ? '<p class="note">No liked threads yet.</p>'
-        : likedRows.map((thread) => `<a class="mini-item" href="forum.html">${thread.title}</a>`).join('');
+        : likedRows.map((thread) => `<a class="mini-item" href="forum.html?t=${thread.id}">${thread.title}</a>`).join('');
   }
 };
 

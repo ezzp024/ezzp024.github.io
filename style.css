@@ -419,7 +419,7 @@ p {
 .feed-tools {
   margin-top: 0.7rem;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   gap: 0.55rem;
 }
 
@@ -584,6 +584,11 @@ select {
   animation: threadIn 0.4s ease;
 }
 
+.thread-highlight {
+  outline: 2px solid rgba(131, 255, 216, 0.7);
+  outline-offset: 2px;
+}
+
 @keyframes threadIn {
   from {
     opacity: 0;
@@ -636,6 +641,18 @@ select {
 .thread-meta {
   font-size: 0.82rem;
   color: #88bcdf;
+}
+
+.category-pill {
+  display: inline-block;
+  margin-right: 0.35rem;
+  border: 1px solid rgba(131, 255, 216, 0.45);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  color: var(--mint);
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
 }
 
 .thread-controls {
@@ -715,6 +732,10 @@ select {
 
 .reply-form input {
   flex: 1;
+}
+
+.reply-form.collapsed {
+  display: none;
 }
 
 .replies.collapsed {
@@ -1033,12 +1054,17 @@ body.forum-focus .forum-layout .side-panel {
 }
 
 .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+body.js-reveal-enabled .reveal {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.reveal.visible {
+body.js-reveal-enabled .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -1049,7 +1075,6 @@ body.forum-focus .forum-layout .side-panel {
 
 @media (max-width: 1080px) {
   .steps,
-  .forum-layout,
   .forum-hero,
   .social-strip,
   .account-grid {
@@ -1058,6 +1083,26 @@ body.forum-focus .forum-layout .side-panel {
 
   .social-links {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 1280px) {
+  .forum-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .forum-layout > .side-panel:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .forum-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .forum-layout > .side-panel:first-child {
+    display: none;
   }
 }
 
@@ -1122,4 +1167,13 @@ body.forum-focus .forum-layout .side-panel {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
 }
