@@ -825,6 +825,14 @@ select {
   background: rgba(7, 20, 35, 0.76);
 }
 
+body:not(.is-authenticated) .session-only {
+  display: none !important;
+}
+
+body.is-authenticated .auth-only {
+  display: none !important;
+}
+
 .session-actions {
   margin-top: 0.6rem;
   display: flex;

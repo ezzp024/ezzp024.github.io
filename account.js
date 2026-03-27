@@ -177,6 +177,8 @@ const getPanelFromHash = () => {
 };
 
 const setUiForLoggedState = (loggedIn) => {
+  document.body.classList.toggle('is-authenticated', loggedIn);
+
   if (guestAuthSection) {
     guestAuthSection.hidden = loggedIn;
   }
@@ -202,7 +204,7 @@ const setUiForLoggedState = (loggedIn) => {
   }
 };
 
-const readUiPrefs = () => {
+const readAccountUiPrefs = () => {
   if (typeof window.getUiPrefs === 'function') {
     return window.getUiPrefs();
   }
@@ -214,7 +216,7 @@ const readUiPrefs = () => {
   }
 };
 
-const writeUiPrefs = (value) => {
+const writeAccountUiPrefs = (value) => {
   localStorage.setItem(ACCOUNT_UI_PREFS_KEY, JSON.stringify(value));
   if (typeof window.applyUiPrefs === 'function') {
     window.applyUiPrefs();
@@ -222,7 +224,7 @@ const writeUiPrefs = (value) => {
 };
 
 const hydrateUiPrefsForm = () => {
-  const prefs = readUiPrefs();
+  const prefs = readAccountUiPrefs();
   if (compactLayout) compactLayout.checked = Boolean(prefs.compactLayout);
   if (reduceMotion) reduceMotion.checked = Boolean(prefs.reduceMotion);
   if (hideSocial) hideSocial.checked = Boolean(prefs.hideSocial);
@@ -635,7 +637,7 @@ if (uiPrefsForm) {
       hideSocial: Boolean(hideSocial?.checked),
       defaultFeedSort: defaultFeedSort?.value === 'new' ? 'new' : 'hot'
     };
-    writeUiPrefs(prefs);
+    writeAccountUiPrefs(prefs);
     setMessage('Interface preferences saved.');
   });
 }
