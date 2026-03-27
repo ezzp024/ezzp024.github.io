@@ -87,6 +87,27 @@ const getAccountRedirectUrl = () => {
   return url.toString();
 };
 
+const showCallbackErrorFromUrl = () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const error = searchParams.get('error') || hashParams.get('error');
+  const description = searchParams.get('error_description') || hashParams.get('error_description');
+
+  if (!error) {
+    return;
+  }
+
+  const message = description ? `${error}: ${description}` : error;
+  setMessage(message, true);
+
+  const cleanUrl = new URL(window.location.href);
+  cleanUrl.searchParams.delete('error');
+  cleanUrl.searchParams.delete('error_description');
+  cleanUrl.searchParams.delete('error_code');
+  cleanUrl.hash = '';
+  window.history.replaceState({}, '', cleanUrl.toString());
+};
+
 const setAuthForm = (tabName) => {
   authTabs.forEach((item) => {
     const active = item.dataset.authTab === tabName;
@@ -724,4 +745,5 @@ if (sb?.auth?.onAuthStateChange) {
 }
 
 setUiForLoggedState(false);
+showCallbackErrorFromUrl();
 renderSession();
